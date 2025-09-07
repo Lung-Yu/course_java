@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <property name="database.username" value="admin" />
+  <property name="app.theme" value="dark" />
+  <property name="debug.enabled" value="false" />
+  <property name="max.students" value="2000" />
+  <property name="database.url" value="jdbc:mysql://localhost:3306/school" />
+  <property name="app.name" value="學生管理系統" />
+  <property name="app.version" value="1.0.0" />
+</configuration>

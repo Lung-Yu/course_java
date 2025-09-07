@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<student id="S001">
+  <name>張小明</name>
+  <age>20</age>
+  <email>ming@example.com</email>
+  <address>
+    <street>中山路123號</street>
+    <city>台北市</city>
+    <zipCode>10048</zipCode>
+    <country>台灣</country>
+  </address>
+  <courses>
+    <course id="CS101">
+      <name>計算機概論</name>
+      <credits>3</credits>
+      <score>85.5</score>
+    </course>
+    <course id="MATH201">
+      <name>微積分</name>
+      <credits>4</credits>
+      <score>92.0</score>
+    </course>
+    <course id="ENG101">
+      <name>英文</name>
+      <credits>2</credits>
+      <score>78.5</score>
+    </course>
+  </courses>
+</student>
