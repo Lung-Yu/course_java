@@ -1,0 +1,66 @@
+{
+  "students": [
+    {
+      "id": "S001",
+      "name": "張小明",
+      "age": 20,
+      "email": "ming@example.com",
+      "courses": [
+        {
+          "courseId": "CS101",
+          "courseName": "計算機概論",
+          "credits": 3,
+          "score": 81.66351096835317
+        },
+        {
+          "courseId": "MATH201",
+          "courseName": "微積分",
+          "credits": 4,
+          "score": 96.18624422572363
+        }
+      ]
+    },
+    {
+      "id": "S002",
+      "name": "李小華",
+      "age": 21,
+      "email": "hua@example.com",
+      "courses": [
+        {
+          "courseId": "CS101",
+          "courseName": "計算機概論",
+          "credits": 3,
+          "score": 97.86858319056626
+        },
+        {
+          "courseId": "MATH201",
+          "courseName": "微積分",
+          "credits": 4,
+          "score": 98.47376520856724
+        }
+      ]
+    },
+    {
+      "id": "S003",
+      "name": "王小美",
+      "age": 19,
+      "email": "mei@example.com",
+      "courses": [
+        {
+          "courseId": "CS101",
+          "courseName": "計算機概論",
+          "credits": 3,
+          "score": 88.3011374421339
+        },
+        {
+          "courseId": "MATH201",
+          "courseName": "微積分",
+          "credits": 4,
+          "score": 88.34903033490875
+        }
+      ]
+    }
+  ],
+  "total": 3,
+  "timestamp": "2025-09-07T23:25:06.753893"
+}

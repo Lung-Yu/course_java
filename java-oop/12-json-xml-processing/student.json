@@ -1,0 +1,32 @@
+{
+  "id": "S001",
+  "name": "張小明",
+  "age": 20,
+  "email": "ming@example.com",
+  "address": {
+    "street": "中山路123號",
+    "city": "台北市",
+    "zipCode": "10048",
+    "country": "台灣"
+  },
+  "courses": [
+    {
+      "courseId": "CS101",
+      "courseName": "計算機概論",
+      "credits": 3,
+      "score": 85.5
+    },
+    {
+      "courseId": "MATH201",
+      "courseName": "微積分",
+      "credits": 4,
+      "score": 92.0
+    },
+    {
+      "courseId": "ENG101",
+      "courseName": "英文",
+      "credits": 2,
+      "score": 78.5
+    }
+  ]
+}
