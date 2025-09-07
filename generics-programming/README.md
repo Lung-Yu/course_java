@@ -11,7 +11,42 @@
 
 ---
 
-## 🔍 泛型基礎概念
+## � 章節結構
+
+本章採用模組化教學方式，按照學習難度循序漸進：
+
+### 📋 學習路徑
+
+```
+01-generics-basics/     ← 🚀 從這裡開始
+├── README.md          # 泛型基礎概念與使用
+└── GenericsBasicsUsage.java
+
+02-generic-classes/     ← ⭐ 接下來學習
+├── README.md          # 泛型類別設計與實作
+└── GenericClassesDemo.java
+
+03-generic-methods/     ← 🔧 然後掌握
+├── README.md          # 泛型方法與工具類
+└── GenericMethodsDemo.java
+
+04-wildcards/          ← 🎭 最後精通
+├── README.md          # 通配符與PECS原則
+└── WildcardsDemo.java
+```
+
+### 🎯 各章節重點
+
+| 章節 | 核心主題 | 學習重點 | 難度 |
+|------|----------|----------|------|
+| **01-generics-basics** | 泛型入門 | 語法、類型安全、基本使用 | ⭐ |
+| **02-generic-classes** | 泛型類別 | 類別設計、繼承、約束 | ⭐⭐ |
+| **03-generic-methods** | 泛型方法 | 靜態方法、實例方法、工具類 | ⭐⭐⭐ |
+| **04-wildcards** | 通配符 | ?, extends, super, PECS | ⭐⭐⭐⭐ |
+
+---
+
+## �🔍 泛型基礎概念
 
 ### 什麼是泛型？
 
