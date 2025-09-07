@@ -10,22 +10,23 @@
 - `exercises/` - 額外練習題目
 - `solutions/` - 練習題解答
 
-### 課程主題目錄
+### 課程大綱
 
-| 目錄 | 主題 | 重點內容 |
-|------|------|----------|
-| `01-oop-principles/` | 物件導向設計原則 | 封裝、繼承、多型、抽象化 |
-| `02-class-design/` | 類別設計與建構 | 建構子、方法、封裝實務 |
-| `03-inheritance/` | 繼承機制 | 單一繼承、方法覆寫、super關鍵字 |
-| `04-abstract-classes/` | 抽象類別與抽象方法 | 抽象設計、模板方法 |
-| `05-interfaces/` | 介面設計 | 介面實作、多重介面、預設方法 |
-| `06-collections-advanced/` | 容器進階應用 | List、Set、Map深度應用 |
-| `07-design-patterns/` | 基本設計模式 | Singleton、Factory、Observer |
-| `08-file-io/` | 檔案讀寫與I/O | FileReader、BufferedReader、InputStream |
-| `09-stream-processing/` | 串流處理 | Stream API、Lambda表達式 |
-| `10-exception-handling/` | 例外處理機制 | try-catch、自訂例外、最佳實務 |
-| `11-multithreading/` | 多執行緒基礎 | Thread、Runnable、ExecutorService |
-| `12-json-xml/` | JSON與XML處理 | 資料交換格式處理 |
+本課程包含以下13個主題：
+
+1. **物件導向設計原則** - 封裝、繼承、多型、抽象
+2. **類別設計與建構** - 建構子、方法重載、封裝實務
+3. **繼承機制** - 繼承階層、方法覆寫、super關鍵字
+4. **抽象類別與方法** - 抽象化設計、模板方法模式
+5. **介面設計與實作** - 介面定義、多重實作、預設方法
+6. **泛型程式設計** - 泛型類別、泛型方法、通配符
+7. **設計模式** - Singleton、Factory、Observer等經典模式
+8. **檔案讀寫與I/O** - 檔案操作、串流處理、NIO
+9. **Stream API與函數式程式設計** - Lambda表達式、Stream操作
+10. **例外處理機制** - 例外階層、自訂例外、資源管理
+11. **多執行緒基礎** - Thread、ExecutorService、同步機制
+12. **JSON和XML處理** - 資料序列化、設定檔管理、API處理
+13. **迴圈設計與遞迴程式設計** - 迴圈優化、遞迴演算法、回溯法 |
 
 ## 🚀 快速開始
 

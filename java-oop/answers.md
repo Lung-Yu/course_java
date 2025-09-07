@@ -568,6 +568,11 @@ java MainClass
 - 完整實作請參考：`12-json-xml-processing/JsonXmlProcessingDemo.java`
 - 功能：JSON/XML序列化、設定檔處理、API回應處理、批次資料處理
 
+### 主題13：迴圈設計與遞迴程式設計
+**迴圈優化與遞迴演算法完整指南：**
+- 完整實作請參考：`13-loops-recursion/LoopsRecursionDemo.java`
+- 涵蓋：迴圈設計原則、經典遞迴演算法、迭代vs遞迴比較、樹狀結構操作、回溯法、效能分析、除錯技巧
+
 ---
 
 ## 完整課程編譯執行範例
@@ -581,6 +586,7 @@ cd ../09-stream-processing && javac StreamProcessingDemo.java
 cd ../10-exception-handling && javac ExceptionHandlingDemo.java
 cd ../11-multithreading && javac MultithreadingDemo.java
 cd ../12-json-xml-processing && javac JsonXmlProcessingDemo.java
+cd ../13-loops-recursion && javac LoopsRecursionDemo.java
 ```
 
 ### 執行所有示範程式
@@ -592,6 +598,7 @@ java StreamProcessingDemo
 java ExceptionHandlingDemo
 java MultithreadingDemo
 java JsonXmlProcessingDemo
+java LoopsRecursionDemo
 ```
 
 ### 課程學習進度檢核
@@ -603,5 +610,6 @@ java JsonXmlProcessingDemo
 - ✅ 主題10：錯誤處理機制
 - ✅ 主題11：並行程式設計
 - ✅ 主題12：資料格式處理
+- ✅ 主題13：迴圈設計與遞迴程式設計
 
-**課程完成！所有主題都包含完整的理論說明、實作範例和可執行程式碼。**
+**課程完成！所有13個主題都包含完整的理論說明、實作範例和可執行程式碼。**
