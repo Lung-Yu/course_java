@@ -30,3 +30,8 @@
     ```sh
     java -version
     ```
+
+
+
+### 編譯
+find . -name "*.java" -exec javac {} \;
