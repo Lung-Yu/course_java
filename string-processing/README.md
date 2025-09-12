@@ -1093,3 +1093,14 @@ public class ConfigParser {
 4. **[日期時間API](../date-time-api/)** - 學習 Java 8+ 的新日期時間處理
 
 **記住：字串處理是程式設計的基礎技能，熟練掌握它對日常開發工作至關重要！** 🎯
+
+---
+
+## 🔗 相關資源
+
+### 📂 UML概念圖
+詳細的模組概念關係和學習流程，請參考：
+- [UML_CONCEPTS.md](./UML_CONCEPTS.md) - 完整的概念架構圖和學習路徑
+
+### 📚 課程大綱
+- [COURSE_OUTLINE.md](../COURSE_OUTLINE.md) - 完整課程大綱與學習指南

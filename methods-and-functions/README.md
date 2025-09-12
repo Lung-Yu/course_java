@@ -816,3 +816,14 @@ public class RecursiveMethods {
 4. **[集合框架](../arrays-and-collections/)** - 運用方法操作集合資料結構
 
 **記住：好的方法設計是編寫高品質程式的基礎！** 🎯
+
+---
+
+## 🔗 相關資源
+
+### 📂 UML概念圖
+詳細的模組概念關係和學習流程，請參考：
+- [UML_CONCEPTS.md](./UML_CONCEPTS.md) - 完整的概念架構圖和學習路徑
+
+### 📚 課程大綱
+- [COURSE_OUTLINE.md](../COURSE_OUTLINE.md) - 完整課程大綱與學習指南

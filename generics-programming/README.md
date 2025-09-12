@@ -997,3 +997,14 @@ public class GenericSingleton<T> {
 4. **[併發程式設計](../concurrency/)** - 學習泛型在多執行緒環境中的應用
 
 **記住：泛型是現代 Java 程式設計的核心特性，掌握它對寫出高品質的程式碼至關重要！** 🎯
+
+---
+
+## 🔗 相關資源
+
+### 📂 UML概念圖
+詳細的模組概念關係和學習流程，請參考：
+- [UML_CONCEPTS.md](./UML_CONCEPTS.md) - 完整的概念架構圖和學習路徑
+
+### 📚 課程大綱
+- [COURSE_OUTLINE.md](../COURSE_OUTLINE.md) - 完整課程大綱與學習指南
