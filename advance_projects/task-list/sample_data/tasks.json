@@ -1,0 +1,48 @@
+[
+  {
+    "title": "實作RESTful API",
+    "description": "設計並實作用戶管理相關的REST API端點",
+    "priority": "HIGH",
+    "dueDate": "2025-01-31 17:00:00"
+  },
+  {
+    "title": "前端響應式設計",
+    "description": "確保網站在各種設備上都能正常顯示",
+    "priority": "MEDIUM",
+    "dueDate": "2025-02-28 12:00:00"
+  },
+  {
+    "title": "資料備份策略",
+    "description": "建立自動化資料備份和災難恢復流程",
+    "priority": "HIGH",
+    "dueDate": "2025-01-15 09:00:00"
+  },
+  {
+    "title": "程式碼審查",
+    "description": "對新功能進行完整的程式碼審查",
+    "priority": "MEDIUM"
+  },
+  {
+    "title": "效能基準測試",
+    "description": "建立系統效能基準測試和持續監控",
+    "priority": "LOW",
+    "dueDate": "2025-03-15 14:30:00"
+  },
+  {
+    "title": "多語言支援",
+    "description": "為應用程式添加國際化(i18n)支援",
+    "priority": "MEDIUM",
+    "dueDate": "2025-04-30 18:00:00"
+  },
+  {
+    "title": "快取優化",
+    "description": "實作Redis快取機制提升系統效能",
+    "priority": "HIGH",
+    "dueDate": "2025-02-15 11:30:00"
+  },
+  {
+    "title": "日誌分析系統",
+    "description": "建立集中化日誌收集和分析平台",
+    "priority": "LOW"
+  }
+]

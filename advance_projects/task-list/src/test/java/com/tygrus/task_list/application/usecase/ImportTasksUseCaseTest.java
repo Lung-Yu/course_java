@@ -221,7 +221,7 @@ class ImportTasksUseCaseTest {
     void execute_WithRepositoryException_ShouldReturnFailureResult() {
         // Given
         String csvContent = "title,description,priority,dueDate\n" +
-                           "Task 1,Description 1,HIGH,2024-12-31 23:59:59\n";
+                           "Task 1,Description 1,HIGH,\n"; // 移除過期日期
         byte[] content = csvContent.getBytes();
         String fileName = "test.csv";
         
