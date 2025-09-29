@@ -130,7 +130,7 @@ class ImportTasksUseCaseTest {
     void execute_WithValidCsvFile_ShouldReturnSuccessResult() {
         // Given
         String csvContent = "title,description,priority,dueDate\n" +
-                           "Task 1,Description 1,HIGH,2024-12-31 23:59:59\n" +
+                           "Task 1,Description 1,HIGH,2025-12-31 23:59:59\n" +
                            "Task 2,Description 2,MEDIUM,\n";
         byte[] content = csvContent.getBytes();
         String fileName = "test.csv";
@@ -161,7 +161,7 @@ class ImportTasksUseCaseTest {
     void execute_WithValidJsonFile_ShouldReturnSuccessResult() {
         // Given
         String jsonContent = "[" +
-                           "{\"title\":\"Task 1\",\"description\":\"Description 1\",\"priority\":\"HIGH\",\"dueDate\":\"2024-12-31 23:59:59\"}," +
+                           "{\"title\":\"Task 1\",\"description\":\"Description 1\",\"priority\":\"HIGH\",\"dueDate\":\"2025-12-31 23:59:59\"}," +
                            "{\"title\":\"Task 2\",\"description\":\"Description 2\",\"priority\":\"MEDIUM\"}" +
                            "]";
         byte[] content = jsonContent.getBytes();
@@ -192,7 +192,7 @@ class ImportTasksUseCaseTest {
     void execute_WithPartiallyValidCsv_ShouldReturnMixedResult() {
         // Given
         String csvContent = "title,description,priority,dueDate\n" +
-                           "Task 1,Description 1,HIGH,2024-12-31 23:59:59\n" +
+                           "Task 1,Description 1,HIGH,2025-12-31 23:59:59\n" +
                            ",Invalid Task,,\n" + // 空標題
                            "Task 3,Description 3,MEDIUM,\n";
         byte[] content = csvContent.getBytes();
