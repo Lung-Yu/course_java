@@ -142,7 +142,8 @@ class TaskTest {
         void shouldThrowException_whenInvalidStatusTransition() {
             // Arrange
             Task task = createValidTask();
-            task.updateStatus(TaskStatus.COMPLETED); // 先完成任務
+            task.updateStatus(TaskStatus.IN_PROGRESS); // 先設為進行中
+            task.updateStatus(TaskStatus.COMPLETED); // 再完成任務
 
             // Act & Assert - 不能從COMPLETED轉回IN_PROGRESS
             assertThatThrownBy(() -> task.updateStatus(TaskStatus.IN_PROGRESS))
