@@ -10,16 +10,13 @@ import com.tygrus.task_list.application.service.notification.NotificationRetrySe
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ForkJoinPool;
 import java.util.List;
-import java.util.ArrayList;
 import java.util.Map;
-import java.util.HashMap;
-import java.util.UUID;
 
 /**
  * UC-009 任務提醒用例實作
@@ -46,7 +43,6 @@ public class TaskReminderUseCase extends ObservableSupport<TaskReminderEvent> {
     private int failedNotifications = 0;
     private LocalDateTime lastProcessingTime;
     
-    @Autowired
     public TaskReminderUseCase(CompositeNotificationService notificationService,
                               NotificationRetryService retryService) {
         super(); // 使用預設的 ForkJoinPool
@@ -71,18 +67,30 @@ public class TaskReminderUseCase extends ObservableSupport<TaskReminderEvent> {
         logger.info("Processing task reminder event: {}", reminderEvent.getEventId());
         
         return CompletableFuture.supplyAsync(() -> {
+            String currentThread = Thread.currentThread().getName();
+            logger.debug("Processing reminder in thread: {}", currentThread);
+            
             try {
                 lastProcessingTime = LocalDateTime.now();
                 totalRemindersProcessed++;
                 
+                logger.debug("Validating reminder event: {}", reminderEvent.getEventId());
+                
                 // 驗證提醒事件
                 validateReminderEvent(reminderEvent);
+                
+                logger.debug("Notifying observers for event: {}", reminderEvent.getEventId());
                 
                 // 通知所有觀察者 (異步)
                 notifyObserversAsync(reminderEvent);
                 
+                logger.debug("Creating notification from event: {}", reminderEvent.getEventId());
+                
                 // 創建通知物件
                 Notification notification = createNotificationFromEvent(reminderEvent);
+                
+                logger.debug("Sending notification: {} for event: {}", 
+                    notification.getId(), reminderEvent.getEventId());
                 
                 // 發送通知
                 boolean notificationSent = sendNotificationWithRetry(notification);
@@ -98,18 +106,20 @@ public class TaskReminderUseCase extends ObservableSupport<TaskReminderEvent> {
                 
                 if (notificationSent) {
                     successfulNotifications++;
-                    logger.info("Task reminder processed successfully: {}", reminderEvent.getEventId());
+                    logger.info("Task reminder processed successfully: {} in thread: {}", 
+                        reminderEvent.getEventId(), currentThread);
                 } else {
                     failedNotifications++;
-                    logger.warn("Task reminder processing failed: {}", reminderEvent.getEventId());
+                    logger.warn("Task reminder processing failed: {} in thread: {}", 
+                        reminderEvent.getEventId(), currentThread);
                 }
                 
                 return result;
                 
             } catch (Exception e) {
                 failedNotifications++;
-                logger.error("Error processing task reminder {}: {}", 
-                    reminderEvent.getEventId(), e.getMessage(), e);
+                logger.error("Error processing task reminder {} in thread {}: {}", 
+                    reminderEvent.getEventId(), currentThread, e.getMessage(), e);
                 
                 return new ReminderResult(
                     reminderEvent.getEventId(),
@@ -120,7 +130,7 @@ public class TaskReminderUseCase extends ObservableSupport<TaskReminderEvent> {
                     e.getMessage()
                 );
             }
-        });
+        }, ForkJoinPool.commonPool()); // 使用 ForkJoinPool 確保異步執行
     }
     
     /**
@@ -206,21 +216,29 @@ public class TaskReminderUseCase extends ObservableSupport<TaskReminderEvent> {
      * 驗證提醒事件
      */
     private void validateReminderEvent(TaskReminderEvent reminderEvent) {
+        logger.debug("Validating reminder event: {}", reminderEvent != null ? reminderEvent.getEventId() : "null");
+        
         if (reminderEvent == null) {
+            logger.error("Reminder event validation failed: event is null");
             throw new IllegalArgumentException("Reminder event cannot be null");
         }
         
         if (reminderEvent.getTask() == null) {
+            logger.error("Reminder event validation failed: task is null for event {}", reminderEvent.getEventId());
             throw new IllegalArgumentException("Task in reminder event cannot be null");
         }
         
         if (reminderEvent.getRecipient() == null || reminderEvent.getRecipient().trim().isEmpty()) {
+            logger.error("Reminder event validation failed: recipient is null or empty for event {}", reminderEvent.getEventId());
             throw new IllegalArgumentException("Recipient in reminder event cannot be null or empty");
         }
         
         if (reminderEvent.getNotificationType() == null) {
+            logger.error("Reminder event validation failed: notification type is null for event {}", reminderEvent.getEventId());
             throw new IllegalArgumentException("Notification type in reminder event cannot be null");
         }
+        
+        logger.debug("Reminder event validation passed for event: {}", reminderEvent.getEventId());
     }
     
     /**
@@ -257,11 +275,33 @@ public class TaskReminderUseCase extends ObservableSupport<TaskReminderEvent> {
      * 發送通知並處理重試
      */
     private boolean sendNotificationWithRetry(Notification notification) {
+        logger.debug("Attempting to send notification: {}", notification.getId());
+        
+        // 在發送前標記為 SENDING 狀態
+        notification.markAsSending();
+        
         boolean success = notificationService.sendNotification(notification);
         
-        if (!success && notification.needsRetry()) {
-            // 安排重試，使用指數退避策略
-            retryService.scheduleRetry(notification, NotificationRetryService.RetryStrategy.EXPONENTIAL);
+        if (!success) {
+            logger.warn("Notification failed to send: {}, scheduling retry", notification.getId());
+            
+            // 設置通知狀態為失敗
+            notification.markAsFailed("Notification service returned false");
+            
+            // 檢查是否需要重試
+            if (notification.needsRetry()) {
+                logger.info("Scheduling retry for notification: {}, retry count: {}", 
+                    notification.getId(), notification.getRetryCount());
+                
+                // 安排重試，使用指數退避策略
+                retryService.scheduleRetry(notification, NotificationRetryService.RetryStrategy.EXPONENTIAL);
+            } else {
+                logger.error("Max retries exceeded for notification: {}", notification.getId());
+            }
+        } else {
+            logger.info("Notification sent successfully: {}", notification.getId());
+            // 標記為成功發送
+            notification.markAsSent();
         }
         
         return success;

@@ -317,7 +317,7 @@ class BatchUpdateTasksUseCaseTest {
             .updatedBy("test-user")
             .build();
 
-        Task completedTask = createTestTask("task-1", TaskStatus.COMPLETED);
+        Task completedTask = createTestTaskWithStatus("task-1", TaskStatus.COMPLETED);
         when(taskRepository.findById(any(TaskId.class))).thenReturn(Optional.of(completedTask));
 
         // When: 執行批次更新
@@ -381,10 +381,10 @@ class BatchUpdateTasksUseCaseTest {
         // task-3 不存在
         when(taskRepository.findById(TaskId.of("task-3"))).thenReturn(Optional.empty());
         
-        // task-4 存在但會在保存時拋出異常（模擬業務規則違反）
-        Task task4 = createTestTask("task-4", TaskStatus.COMPLETED);
+        // task-4 存在但處於已完成狀態，無法轉換到其他狀態（業務規則違反）
+        Task task4 = createTestTaskWithStatus("task-4", TaskStatus.COMPLETED);
         when(taskRepository.findById(TaskId.of("task-4"))).thenReturn(Optional.of(task4));
-        // 不設置 save 的 mock，讓它使用預設行為或拋出異常
+        // 不需要設置 save 的 mock，因為狀態轉換會失敗
     }
 
     private Task createTestTask(String taskId, TaskStatus status) {
@@ -396,11 +396,37 @@ class BatchUpdateTasksUseCaseTest {
             .createdAt(LocalDateTime.now())
             .build();
         
-        // 如果需要特定狀態且不是預設的PENDING，則需要模擬狀態轉換
-        if (status != TaskStatus.PENDING) {
-            // 為了測試目的，我們創建一個模擬任務，
-            // 實際上我們需要檢查Task類是否提供了狀態設置的方法
-            // 這裡我們返回一個基本的任務，測試時會根據repository的mock行為來處理
+        return task;
+    }
+    
+    /**
+     * 創建具有特定狀態的測試任務
+     * 使用反射或其他機制來設置狀態，因為正常業務邏輯不允許直接設置任意狀態
+     */
+    private Task createTestTaskWithStatus(String taskId, TaskStatus status) {
+        Task task = Task.builder()
+            .id(TaskId.of(taskId))
+            .title("Test Task " + taskId)
+            .description("Test Description")
+            .priority(Priority.MEDIUM)
+            .createdAt(LocalDateTime.now())
+            .build();
+        
+        // 如果需要設置為 COMPLETED 狀態，我們模擬正常的狀態轉換流程
+        if (status == TaskStatus.COMPLETED) {
+            try {
+                task.updateStatus(TaskStatus.IN_PROGRESS); // 先轉到進行中
+                task.updateStatus(TaskStatus.COMPLETED);    // 再轉到完成
+            } catch (Exception e) {
+                // 如果轉換失敗，使用反射設置狀態
+                try {
+                    java.lang.reflect.Field statusField = Task.class.getDeclaredField("status");
+                    statusField.setAccessible(true);
+                    statusField.set(task, status);
+                } catch (Exception reflectionException) {
+                    throw new RuntimeException("Failed to set task status for testing", reflectionException);
+                }
+            }
         }
         
         return task;
