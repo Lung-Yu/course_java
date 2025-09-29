@@ -27,7 +27,8 @@ public class TaskReminderConfig {
     @Bean
     @ConditionalOnMissingBean(TaskRepository.class)
     public TaskRepository taskRepository() {
-        return new InMemoryTaskRepository();
+        InMemoryTaskRepository inMemoryRepo = new InMemoryTaskRepository();
+        return new com.tygrus.task_list.infrastructure.repository.DomainTaskRepositoryAdapter(inMemoryRepo);
     }
     
     /**

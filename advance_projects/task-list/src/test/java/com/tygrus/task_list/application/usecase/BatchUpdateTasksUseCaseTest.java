@@ -91,7 +91,7 @@ class BatchUpdateTasksUseCaseTest {
         List<String> taskIds = Arrays.asList("task-1", "task-2", "task-3", "task-4");
         BatchUpdateTaskRequest request = BatchUpdateTaskRequest.builder()
             .taskIds(taskIds)
-            .newStatus(TaskStatus.COMPLETED)
+            .newStatus(TaskStatus.IN_PROGRESS)  // 使用合法的狀態轉換
             .updatedBy("test-user")
             .reason("Partial failure test")
             .build();
@@ -229,7 +229,7 @@ class BatchUpdateTasksUseCaseTest {
         
         BatchUpdateTaskRequest request = BatchUpdateTaskRequest.builder()
             .taskIds(taskIds)
-            .newStatus(TaskStatus.COMPLETED)
+            .newStatus(TaskStatus.IN_PROGRESS)  // 使用合法的狀態轉換：PENDING -> IN_PROGRESS
             .updatedBy("performance-test")
             .batchSize(10)
             .build();
@@ -370,7 +370,7 @@ class BatchUpdateTasksUseCaseTest {
     }
 
     private void setupMixedResultTasks() {
-        // task-1, task-2 成功
+        // task-1, task-2 成功：從 PENDING 轉換到 IN_PROGRESS
         Task task1 = createTestTask("task-1", TaskStatus.PENDING);
         Task task2 = createTestTask("task-2", TaskStatus.PENDING);
         when(taskRepository.findById(TaskId.of("task-1"))).thenReturn(Optional.of(task1));
@@ -381,7 +381,7 @@ class BatchUpdateTasksUseCaseTest {
         // task-3 不存在
         when(taskRepository.findById(TaskId.of("task-3"))).thenReturn(Optional.empty());
         
-        // task-4 存在但處於已完成狀態，無法轉換到其他狀態（業務規則違反）
+        // task-4 存在但處於已完成狀態，無法轉換到 IN_PROGRESS（業務規則違反）
         Task task4 = createTestTaskWithStatus("task-4", TaskStatus.COMPLETED);
         when(taskRepository.findById(TaskId.of("task-4"))).thenReturn(Optional.of(task4));
         // 不需要設置 save 的 mock，因為狀態轉換會失敗
@@ -414,18 +414,20 @@ class BatchUpdateTasksUseCaseTest {
         
         // 如果需要設置為 COMPLETED 狀態，我們模擬正常的狀態轉換流程
         if (status == TaskStatus.COMPLETED) {
+            task.updateStatus(TaskStatus.IN_PROGRESS); // 先轉到進行中
+            task.updateStatus(TaskStatus.COMPLETED);    // 再轉到完成
+        } else if (status == TaskStatus.IN_PROGRESS) {
+            task.updateStatus(TaskStatus.IN_PROGRESS);
+        } else if (status == TaskStatus.CANCELLED) {
+            task.updateStatus(TaskStatus.CANCELLED);
+        } else if (status != TaskStatus.PENDING) {
+            // 對於其他狀態，使用反射設置
             try {
-                task.updateStatus(TaskStatus.IN_PROGRESS); // 先轉到進行中
-                task.updateStatus(TaskStatus.COMPLETED);    // 再轉到完成
-            } catch (Exception e) {
-                // 如果轉換失敗，使用反射設置狀態
-                try {
-                    java.lang.reflect.Field statusField = Task.class.getDeclaredField("status");
-                    statusField.setAccessible(true);
-                    statusField.set(task, status);
-                } catch (Exception reflectionException) {
-                    throw new RuntimeException("Failed to set task status for testing", reflectionException);
-                }
+                java.lang.reflect.Field statusField = Task.class.getDeclaredField("status");
+                statusField.setAccessible(true);
+                statusField.set(task, status);
+            } catch (Exception reflectionException) {
+                throw new RuntimeException("Failed to set task status for testing", reflectionException);
             }
         }
         

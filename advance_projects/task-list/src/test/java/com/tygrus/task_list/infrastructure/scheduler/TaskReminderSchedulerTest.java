@@ -408,20 +408,25 @@ class TaskReminderSchedulerTest {
         
         @Test
         @DisplayName("提醒處理異常不應該影響其他任務")
-        void shouldContinueProcessingWhenReminderFails() {
+        void shouldContinueProcessingWhenReminderFails() throws Exception {
             // Given
             Task task1 = Task.builder().id(TaskId.of("task-1")).title("Task 1").description("Desc").priority(Priority.LOW).dueDate(LocalDateTime.now().plusHours(1)).build();
             Task task2 = Task.builder().id(TaskId.of("task-2")).title("Task 2").description("Desc").priority(Priority.LOW).dueDate(LocalDateTime.now().plusHours(2)).build();
             
             when(mockTaskRepository.findTasksWithDueDateBetween(any(), any()))
                 .thenReturn(List.of(task1, task2));
+            
+            // 第一個任務返回失敗的 CompletableFuture，第二個任務返回成功的 CompletableFuture
             when(mockTaskReminderUseCase.handleTaskReminder(any()))
-                .thenThrow(new RuntimeException("Reminder failed"))
+                .thenReturn(CompletableFuture.failedFuture(new RuntimeException("Reminder failed")))
                 .thenReturn(CompletableFuture.completedFuture(
                     new TaskReminderUseCase.ReminderResult("event-2", "task-2", true, "notif-2", LocalDateTime.now())));
             
             // When & Then
             assertDoesNotThrow(() -> scheduler.checkUpcomingDueDates());
+            
+            // 等待異步處理完成
+            Thread.sleep(500);
             
             // 應該嘗試處理兩個任務
             verify(mockTaskReminderUseCase, times(2)).handleTaskReminder(any());

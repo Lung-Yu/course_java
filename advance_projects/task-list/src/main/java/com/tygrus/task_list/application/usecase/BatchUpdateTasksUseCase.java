@@ -166,7 +166,7 @@ public class BatchUpdateTasksUseCase {
         for (int attempt = 1; attempt <= maxRetries + 1; attempt++) {
             try {
                 return updateSingleTask(taskId, request, attempt);
-            } catch (OptimisticLockException | IllegalStatusTransitionException e) {
+            } catch (OptimisticLockException e) {
                 lastException = e;
                 totalRetries.incrementAndGet();
                 
@@ -181,12 +181,11 @@ public class BatchUpdateTasksUseCase {
                     }
                 } else {
                     // 最後一次嘗試失敗
-                    throw new ConcurrencyConflictException(taskId, 
-                        e instanceof OptimisticLockException ? "OPTIMISTIC_LOCK" : "STATUS_TRANSITION",
+                    throw new ConcurrencyConflictException(taskId, "OPTIMISTIC_LOCK",
                         "Failed after " + maxRetries + " retries: " + e.getMessage(), e, attempt);
                 }
-            } catch (TaskNotFoundException e) {
-                // 任務不存在不需要重試
+            } catch (TaskNotFoundException | IllegalStatusTransitionException e) {
+                // 任務不存在或業務規則違反不需要重試
                 throw e;
             }
         }

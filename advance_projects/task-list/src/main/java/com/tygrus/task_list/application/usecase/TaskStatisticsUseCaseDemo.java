@@ -34,8 +34,10 @@ public class TaskStatisticsUseCaseDemo {
     
     public TaskStatisticsUseCaseDemo() {
         this.taskRepository = new InMemoryTaskRepository();
+        com.tygrus.task_list.domain.repository.TaskRepository domainRepo = 
+            new com.tygrus.task_list.infrastructure.repository.DomainTaskRepositoryAdapter(taskRepository);
         this.cache = new StatisticsCache(15, 100); // 15分鐘TTL, 100項目上限
-        this.taskStatisticsUseCase = new TaskStatisticsUseCase(taskRepository, cache);
+        this.taskStatisticsUseCase = new TaskStatisticsUseCase(domainRepo, cache);
         
         // 初始化測試資料
         initializeTestData();

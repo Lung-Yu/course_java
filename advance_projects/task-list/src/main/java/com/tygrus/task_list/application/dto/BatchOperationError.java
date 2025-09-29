@@ -28,7 +28,15 @@ public class BatchOperationError {
         this.errorType = cause != null ? cause.getClass().getSimpleName() : "Unknown";
         this.cause = cause;
         this.timestamp = LocalDateTime.now();
-        this.retryAttempts = retryAttempts;
+        
+        // 如果是 ConcurrencyConflictException，使用其 attemptNumber
+        if (cause instanceof com.tygrus.task_list.application.exception.ConcurrencyConflictException) {
+            com.tygrus.task_list.application.exception.ConcurrencyConflictException cce = 
+                (com.tygrus.task_list.application.exception.ConcurrencyConflictException) cause;
+            this.retryAttempts = cce.getAttemptNumber() - 1; // attemptNumber 是從1開始，retryAttempts 是重試次數
+        } else {
+            this.retryAttempts = retryAttempts;
+        }
     }
     
     // Getters
@@ -68,7 +76,7 @@ public class BatchOperationError {
      */
     public boolean isConcurrencyError() {
         return "OptimisticLockException".equals(errorType) || 
-               "IllegalStatusTransitionException".equals(errorType);
+               "ConcurrencyConflictException".equals(errorType);
     }
     
     /**

@@ -27,12 +27,13 @@ import static org.junit.jupiter.api.Assertions.*;
 class TaskStatisticsUseCaseTest {
     
     private TaskStatisticsUseCase taskStatisticsUseCase;
-    private InMemoryTaskRepository taskRepository;
+    private com.tygrus.task_list.domain.repository.TaskRepository taskRepository;
     private StatisticsCache statisticsCache;
     
     @BeforeEach
     void setUp() {
-        taskRepository = new InMemoryTaskRepository();
+        InMemoryTaskRepository inMemoryRepo = new InMemoryTaskRepository();
+        taskRepository = new com.tygrus.task_list.infrastructure.repository.DomainTaskRepositoryAdapter(inMemoryRepo);
         statisticsCache = new StatisticsCache(5, 10); // 短TTL用於測試
         taskStatisticsUseCase = new TaskStatisticsUseCase(taskRepository, statisticsCache);
         
@@ -273,7 +274,9 @@ class TaskStatisticsUseCaseTest {
     void testCacheCleanup() throws InterruptedException {
         // Given - 使用很短的TTL
         StatisticsCache shortTtlCache = new StatisticsCache(0, 10); // 0分鐘TTL
-        TaskStatisticsUseCase useCase = new TaskStatisticsUseCase(taskRepository, shortTtlCache);
+        com.tygrus.task_list.domain.repository.TaskRepository domainRepo = 
+            new com.tygrus.task_list.infrastructure.repository.DomainTaskRepositoryAdapter(new InMemoryTaskRepository());
+        TaskStatisticsUseCase useCase = new TaskStatisticsUseCase(domainRepo, shortTtlCache);
         
         StatisticsRequest request = StatisticsRequest.builder()
             .lastDays(7)

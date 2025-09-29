@@ -3,7 +3,6 @@ package com.tygrus.task_list.infrastructure.repository;
 import com.tygrus.task_list.domain.model.Task;
 import com.tygrus.task_list.domain.model.TaskId;
 import com.tygrus.task_list.domain.model.TaskStatus;
-import com.tygrus.task_list.domain.repository.TaskRepository;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -14,6 +13,7 @@ import java.util.stream.Collectors;
 /**
  * 記憶體內任務儲存庫實作
  * 用於演示和測試目的
+ * 實現了 infrastructure.repository.TaskRepository 接口，為調度器提供資料存取支援
  */
 @Repository
 public class InMemoryTaskRepository implements TaskRepository {
@@ -44,6 +44,7 @@ public class InMemoryTaskRepository implements TaskRepository {
         return new ArrayList<>(tasks.values());
     }
     
+    @Override
     public List<Task> findByStatus(TaskStatus... statuses) {
         if (statuses == null || statuses.length == 0) {
             return new ArrayList<>();
@@ -56,6 +57,7 @@ public class InMemoryTaskRepository implements TaskRepository {
             .collect(Collectors.toList());
     }
     
+    @Override
     public List<Task> findTasksWithDueDateBetween(LocalDateTime startTime, LocalDateTime endTime) {
         if (startTime == null || endTime == null) {
             return new ArrayList<>();
@@ -68,6 +70,7 @@ public class InMemoryTaskRepository implements TaskRepository {
             .collect(Collectors.toList());
     }
     
+    @Override
     public List<Task> findOverdueTasks(LocalDateTime currentTime) {
         if (currentTime == null) {
             return new ArrayList<>();
@@ -82,9 +85,10 @@ public class InMemoryTaskRepository implements TaskRepository {
     }
     
     /**
-     * 刪除任務（返回 boolean 版本，用於舊有程式碼相容性）
+     * 刪除任務
      */
-    public boolean deleteByIdWithResult(TaskId taskId) {
+    @Override
+    public boolean deleteById(TaskId taskId) {
         if (taskId == null) {
             return false;
         }
@@ -101,10 +105,12 @@ public class InMemoryTaskRepository implements TaskRepository {
         return tasks.containsKey(taskId);
     }
     
+    @Override
     public long count() {
         return tasks.size();
     }
     
+    @Override
     public long countByStatus(TaskStatus status) {
         if (status == null) {
             return 0;
@@ -125,7 +131,6 @@ public class InMemoryTaskRepository implements TaskRepository {
     /**
      * 批量儲存任務
      */
-    @Override
     public List<Task> saveAll(List<Task> taskList) {
         if (taskList == null) {
             return new ArrayList<>();
@@ -139,11 +144,11 @@ public class InMemoryTaskRepository implements TaskRepository {
     }
     
     // === 實作 domain.repository.TaskRepository 的額外方法 ===
+    // 注意：這些方法用於其他需要 domain.repository.TaskRepository 的用例
     
     /**
-     * 批次查詢任務
+     * 批次查詢任務（用於 domain repository 支援）
      */
-    @Override
     public Map<TaskId, Task> findByIds(List<TaskId> taskIds) {
         if (taskIds == null || taskIds.isEmpty()) {
             return new HashMap<>();
@@ -160,9 +165,8 @@ public class InMemoryTaskRepository implements TaskRepository {
     }
     
     /**
-     * 檢查任務是否存在（批次版本）
+     * 檢查任務是否存在（批次版本，用於 domain repository 支援）
      */
-    @Override
     public Map<TaskId, Boolean> existsByIds(List<TaskId> taskIds) {
         if (taskIds == null || taskIds.isEmpty()) {
             return new HashMap<>();
@@ -176,10 +180,9 @@ public class InMemoryTaskRepository implements TaskRepository {
     }
     
     /**
-     * 使用樂觀鎖更新任務
+     * 使用樂觀鎖更新任務（用於 domain repository 支援）
      * 注意：此實作簡化了樂觀鎖邏輯，實際生產環境需要更複雜的版本控制
      */
-    @Override
     public Task saveWithOptimisticLock(Task task, Long expectedVersion) {
         if (task == null) {
             throw new IllegalArgumentException("Task cannot be null");
@@ -193,15 +196,5 @@ public class InMemoryTaskRepository implements TaskRepository {
         }
         
         return save(task);
-    }
-    
-    /**
-     * 刪除任務（實作 domain repository 介面）
-     */
-    @Override
-    public void deleteById(TaskId taskId) {
-        if (taskId != null) {
-            tasks.remove(taskId);
-        }
     }
 }

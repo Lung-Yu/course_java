@@ -209,6 +209,10 @@ public class TaskReminderScheduler {
                     logger.error("Failed to send upcoming reminder for task {}: {}", 
                         task.getId().getValue(), e.getMessage(), e);
                 }
+            }).exceptionally(throwable -> {
+                logger.error("Exception in async reminder processing for task {}: {}", 
+                    task.getId().getValue(), throwable.getMessage(), throwable);
+                return null;
             });
             
         } catch (Exception e) {
@@ -247,6 +251,10 @@ public class TaskReminderScheduler {
                     logger.error("Failed to send overdue reminder for task {}: {}", 
                         task.getId().getValue(), e.getMessage(), e);
                 }
+            }).exceptionally(throwable -> {
+                logger.error("Exception in async overdue reminder processing for task {}: {}", 
+                    task.getId().getValue(), throwable.getMessage(), throwable);
+                return null;
             });
             
         } catch (Exception e) {
@@ -277,6 +285,10 @@ public class TaskReminderScheduler {
                     logger.error("Failed to send daily summary for task {}: {}", 
                         task.getId().getValue(), e.getMessage(), e);
                 }
+            }).exceptionally(throwable -> {
+                logger.error("Exception in async daily summary processing for task {}: {}", 
+                    task.getId().getValue(), throwable.getMessage(), throwable);
+                return null;
             });
             
         } catch (Exception e) {
@@ -307,6 +319,10 @@ public class TaskReminderScheduler {
                     logger.error("Failed to send weekly summary for task {}: {}", 
                         task.getId().getValue(), e.getMessage(), e);
                 }
+            }).exceptionally(throwable -> {
+                logger.error("Exception in async weekly summary processing for task {}: {}", 
+                    task.getId().getValue(), throwable.getMessage(), throwable);
+                return null;
             });
             
         } catch (Exception e) {
