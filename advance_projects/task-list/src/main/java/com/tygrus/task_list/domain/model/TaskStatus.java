@@ -23,6 +23,11 @@ public enum TaskStatus {
      * 檢查狀態轉換是否合法
      */
     public boolean canTransitionTo(TaskStatus newStatus) {
+        // 允許轉換到相同狀態（用於重新確認或記錄操作）
+        if (this == newStatus) {
+            return true;
+        }
+        
         return switch (this) {
             case PENDING -> newStatus == IN_PROGRESS || newStatus == CANCELLED;
             case IN_PROGRESS -> newStatus == COMPLETED || newStatus == CANCELLED;

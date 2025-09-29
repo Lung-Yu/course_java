@@ -132,6 +132,15 @@ public class Task {
     }
     
     /**
+     * 添加Domain Event
+     */
+    public void addDomainEvent(DomainEvent event) {
+        if (event != null) {
+            this.domainEvents.add(event);
+        }
+    }
+    
+    /**
      * 清除Domain Events (通常在事件發布後調用)
      */
     public void clearDomainEvents() {
