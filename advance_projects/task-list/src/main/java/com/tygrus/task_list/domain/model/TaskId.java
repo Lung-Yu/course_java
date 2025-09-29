@@ -14,14 +14,15 @@ public final class TaskId {
     
     private TaskId(String value) {
         validateValue(value);
-        this.value = value;
+        this.value = value != null ? value.trim() : null;
     }
     
     private void validateValue(String value) {
         if (value == null) {
             throw new IllegalArgumentException("TaskId value cannot be null");
         }
-        if (value.trim().isEmpty()) {
+        String trimmedValue = value.trim();
+        if (trimmedValue.isEmpty()) {
             throw new IllegalArgumentException("TaskId value cannot be empty");
         }
         // 可以加入更多格式驗證，例如UUID格式檢查
