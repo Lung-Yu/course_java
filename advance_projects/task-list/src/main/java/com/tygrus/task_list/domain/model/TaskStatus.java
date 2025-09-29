@@ -4,6 +4,7 @@ package com.tygrus.task_list.domain.model;
  * 任務狀態枚舉
  */
 public enum TaskStatus {
+    TODO("待處理"),
     PENDING("待處理"),
     IN_PROGRESS("進行中"), 
     COMPLETED("已完成"),
@@ -19,6 +20,11 @@ public enum TaskStatus {
         return description;
     }
     
+    // 為了向後兼容性添加 getDisplayName 方法
+    public String getDisplayName() {
+        return description;
+    }
+    
     /**
      * 檢查狀態轉換是否合法
      */
@@ -29,7 +35,7 @@ public enum TaskStatus {
         }
         
         return switch (this) {
-            case PENDING -> newStatus == IN_PROGRESS || newStatus == CANCELLED;
+            case TODO, PENDING -> newStatus == IN_PROGRESS || newStatus == CANCELLED;
             case IN_PROGRESS -> newStatus == COMPLETED || newStatus == CANCELLED;
             case COMPLETED, CANCELLED -> false; // 終態不能轉換
         };

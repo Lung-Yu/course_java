@@ -24,4 +24,9 @@ public enum Priority {
     public String getDescription() {
         return description;
     }
+    
+    // 為了向後兼容性添加 getDisplayName 方法
+    public String getDisplayName() {
+        return description;
+    }
 }
