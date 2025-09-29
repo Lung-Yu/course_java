@@ -11,11 +11,21 @@
 - [ ] Maven依賴管理配置
 - [ ] 基礎配置檔案設定
 
-#### 1.2 Domain Layer 實作
-**技術重點: 物件導向程式設計**
-- [ ] 核心實體設計 (Task, User, Attachment)
-- [ ] 值物件實作 (TaskId, UserId)
-- [ ] 列舉類別 (TaskStatus, Priority)
+#### 1.2 Domain Layer 實作 (TDD方式)
+**技術重點: 物件導向程式設計 + TDD**
+- [ ] Task實體 (TDD: Red→Green→Refactor)
+  - [ ] Red: 寫Task創建失敗測試
+  - [ ] Green: 實作基本Task類別
+  - [ ] Refactor: 改善封裝和驗證
+- [ ] TaskId值物件 (TDD週期)
+  - [ ] Red: 寫TaskId驗證測試
+  - [ ] Green: 實作UUID-based TaskId
+  - [ ] Refactor: 改善類型安全
+- [ ] TaskStatus枚舉 (TDD週期)
+  - [ ] Red: 寫狀態轉換測試
+  - [ ] Green: 實作基本枚舉
+  - [ ] Refactor: 加入轉換規則
+- [ ] Priority枚舉 (TDD週期)
 - [ ] Domain服務介面定義
 - [ ] Repository介面設計
 
