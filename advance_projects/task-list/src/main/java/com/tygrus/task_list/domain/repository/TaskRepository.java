@@ -3,6 +3,7 @@ package com.tygrus.task_list.domain.repository;
 import com.tygrus.task_list.domain.model.Task;
 import com.tygrus.task_list.domain.model.TaskId;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -32,4 +33,11 @@ public interface TaskRepository {
      * 刪除任務
      */
     void deleteById(TaskId taskId);
+    
+    /**
+     * 查詢所有任務
+     * 為QueryTaskListUseCase提供基礎資料
+     * 實際的過濾、排序、分頁邏輯在Application層實現
+     */
+    List<Task> findAll();
 }
