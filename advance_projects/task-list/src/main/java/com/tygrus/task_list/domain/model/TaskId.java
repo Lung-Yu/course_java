@@ -25,7 +25,24 @@ public final class TaskId {
         if (trimmedValue.isEmpty()) {
             throw new IllegalArgumentException("TaskId value cannot be empty");
         }
-        // 可以加入更多格式驗證，例如UUID格式檢查
+        if (trimmedValue.length() > 255) {
+            throw new IllegalArgumentException("TaskId value cannot exceed 255 characters");
+        }
+    }
+    
+    /**
+     * 檢查字串是否為有效的UUID格式
+     */
+    public static boolean isValidUuidFormat(String value) {
+        if (value == null || value.trim().isEmpty()) {
+            return false;
+        }
+        try {
+            UUID.fromString(value.trim());
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
     }
     
     public static TaskId generate() {
@@ -34,6 +51,27 @@ public final class TaskId {
     
     public static TaskId of(String value) {
         return new TaskId(value);
+    }
+    
+    /**
+     * 從UUID物件創建TaskId
+     */
+    public static TaskId fromUuid(UUID uuid) {
+        if (uuid == null) {
+            throw new IllegalArgumentException("UUID cannot be null");
+        }
+        return new TaskId(uuid.toString());
+    }
+    
+    /**
+     * 嘗試從字串創建TaskId，如果格式無效則返回空
+     */
+    public static java.util.Optional<TaskId> tryParse(String value) {
+        try {
+            return java.util.Optional.of(new TaskId(value));
+        } catch (IllegalArgumentException e) {
+            return java.util.Optional.empty();
+        }
     }
     
     public String getValue() {
@@ -51,6 +89,24 @@ public final class TaskId {
     @Override
     public int hashCode() {
         return Objects.hash(value);
+    }
+    
+    /**
+     * 檢查此TaskId是否為UUID格式
+     */
+    public boolean isUuidFormat() {
+        return isValidUuidFormat(this.value);
+    }
+    
+    /**
+     * 如果是UUID格式，轉換為UUID物件
+     */
+    public java.util.Optional<UUID> toUuid() {
+        try {
+            return java.util.Optional.of(UUID.fromString(this.value));
+        } catch (IllegalArgumentException e) {
+            return java.util.Optional.empty();
+        }
     }
     
     @Override
