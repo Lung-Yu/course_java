@@ -14,9 +14,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -60,6 +58,44 @@ public class ImportTasksDemo {
         @Override
         public List<Task> findAll() {
             return List.copyOf(tasks.values());
+        }
+        
+        @Override
+        public Map<TaskId, Task> findByIds(List<TaskId> taskIds) {
+            Map<TaskId, Task> result = new HashMap<>();
+            for (TaskId taskId : taskIds) {
+                Task task = tasks.get(taskId.getValue());
+                if (task != null) {
+                    result.put(taskId, task);
+                }
+            }
+            return result;
+        }
+        
+        @Override
+        public List<Task> saveAll(List<Task> tasksToSave) {
+            List<Task> savedTasks = new ArrayList<>();
+            for (Task task : tasksToSave) {
+                Task savedTask = save(task);
+                savedTasks.add(savedTask);
+            }
+            return savedTasks;
+        }
+        
+        @Override
+        public Map<TaskId, Boolean> existsByIds(List<TaskId> taskIds) {
+            Map<TaskId, Boolean> result = new HashMap<>();
+            for (TaskId taskId : taskIds) {
+                result.put(taskId, existsById(taskId));
+            }
+            return result;
+        }
+        
+        @Override
+        public Task saveWithOptimisticLock(Task task, Long expectedVersion) {
+            // 簡化的樂觀鎖實現
+            // 在真實應用中，這應該檢查版本號並在衝突時拋出異常
+            return save(task);
         }
         
         public void clear() {
