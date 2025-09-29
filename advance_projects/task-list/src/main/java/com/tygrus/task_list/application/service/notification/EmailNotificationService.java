@@ -58,7 +58,10 @@ public class EmailNotificationService extends AbstractNotificationService {
         boolean success = Math.random() > 0.1;
         
         if (success) {
-            logger.info("Email sent successfully to: {}", notification.getRecipient());
+            logger.info("Email notification sent successfully - Thread: {}, Recipient: {}, Subject: {}",
+            Thread.currentThread().threadId(),
+            notification.getRecipient(),
+            notification.getTitle());
             notification.addMetadata("sent_at", java.time.LocalDateTime.now().toString());
             notification.addMetadata("message_id", generateMessageId());
         } else {
@@ -165,7 +168,7 @@ public class EmailNotificationService extends AbstractNotificationService {
     private String generateMessageId() {
         return String.format("<%d.%d@%s>", 
             System.currentTimeMillis(),
-            Thread.currentThread().getId(),
+            Thread.currentThread().threadId(),
             smtpServer);
     }
     

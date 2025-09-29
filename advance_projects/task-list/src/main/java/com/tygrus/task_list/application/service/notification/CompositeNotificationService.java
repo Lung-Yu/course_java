@@ -26,7 +26,6 @@ public class CompositeNotificationService implements NotificationService {
     
     private final NotificationServiceFactory serviceFactory;
     
-    @Autowired
     public CompositeNotificationService(NotificationServiceFactory serviceFactory) {
         this.serviceFactory = serviceFactory;
     }

@@ -184,7 +184,7 @@ public class SmsNotificationService extends AbstractNotificationService {
     private String generateMessageId() {
         return String.format("SMS-%d-%d", 
             System.currentTimeMillis(),
-            Thread.currentThread().getId());
+            Thread.currentThread().threadId());
     }
     
     /**

@@ -16,6 +16,7 @@ import org.mockito.ArgumentCaptor;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -121,7 +122,7 @@ class TaskReminderSchedulerTest {
         
         @Test
         @DisplayName("應該檢查即將到期的任務")
-        void shouldCheckUpcomingDueTasks() {
+        void shouldCheckUpcomingDueTasks() throws Exception {
             // Given
             LocalDateTime now = LocalDateTime.now();
             LocalDateTime tomorrow = now.plusHours(24);
@@ -135,6 +136,9 @@ class TaskReminderSchedulerTest {
             // When
             scheduler.checkUpcomingDueDates();
             
+            // Wait for async execution
+            Thread.sleep(100);
+            
             // Then
             verify(mockTaskRepository).findTasksWithDueDateBetween(
                 argThat(time -> time.isAfter(now.minusMinutes(1)) && time.isBefore(now.plusMinutes(1))),
@@ -143,7 +147,7 @@ class TaskReminderSchedulerTest {
             
             // 驗證提醒事件被處理
             ArgumentCaptor<TaskReminderEvent> eventCaptor = ArgumentCaptor.forClass(TaskReminderEvent.class);
-            verify(mockTaskReminderUseCase).handleTaskReminder(eventCaptor.capture());
+            verify(mockTaskReminderUseCase, timeout(1000)).handleTaskReminder(eventCaptor.capture());
             
             TaskReminderEvent capturedEvent = eventCaptor.getValue();
             assertEquals(testTask, capturedEvent.getTask());
@@ -191,7 +195,7 @@ class TaskReminderSchedulerTest {
         
         @Test
         @DisplayName("應該根據優先級和時間選擇通知類型")
-        void shouldSelectNotificationTypeBasedOnPriorityAndTime() {
+        void shouldSelectNotificationTypeBasedOnPriorityAndTime() throws Exception {
             // Given
             Task highPriorityTask = Task.builder()
                 .id(TaskId.of("high-priority"))
@@ -212,7 +216,7 @@ class TaskReminderSchedulerTest {
             
             // Then
             ArgumentCaptor<TaskReminderEvent> eventCaptor = ArgumentCaptor.forClass(TaskReminderEvent.class);
-            verify(mockTaskReminderUseCase).handleTaskReminder(eventCaptor.capture());
+            verify(mockTaskReminderUseCase, timeout(1000)).handleTaskReminder(eventCaptor.capture());
             
             TaskReminderEvent event = eventCaptor.getValue();
             // 高優先級且接近到期應該使用SMS
@@ -227,7 +231,7 @@ class TaskReminderSchedulerTest {
         
         @Test
         @DisplayName("應該檢查逾期任務")
-        void shouldCheckOverdueTasks() {
+        void shouldCheckOverdueTasks() throws Exception {
             // Given
             Task overdueTask = Task.builder()
                 .id(TaskId.of("overdue-task"))
@@ -250,7 +254,7 @@ class TaskReminderSchedulerTest {
             verify(mockTaskRepository).findOverdueTasks(any(LocalDateTime.class));
             
             ArgumentCaptor<TaskReminderEvent> eventCaptor = ArgumentCaptor.forClass(TaskReminderEvent.class);
-            verify(mockTaskReminderUseCase).handleTaskReminder(eventCaptor.capture());
+            verify(mockTaskReminderUseCase, timeout(1000)).handleTaskReminder(eventCaptor.capture());
             
             TaskReminderEvent event = eventCaptor.getValue();
             assertEquals(overdueTask, event.getTask());
@@ -259,7 +263,7 @@ class TaskReminderSchedulerTest {
         
         @Test
         @DisplayName("高優先級逾期任務應該使用SMS通知")
-        void shouldUseSmsForHighPriorityOverdueTasks() {
+        void shouldUseSmsForHighPriorityOverdueTasks() throws Exception {
             // Given
             Task highPriorityOverdueTask = Task.builder()
                 .id(TaskId.of("high-overdue"))
@@ -280,7 +284,7 @@ class TaskReminderSchedulerTest {
             
             // Then
             ArgumentCaptor<TaskReminderEvent> eventCaptor = ArgumentCaptor.forClass(TaskReminderEvent.class);
-            verify(mockTaskReminderUseCase).handleTaskReminder(eventCaptor.capture());
+            verify(mockTaskReminderUseCase, timeout(1000)).handleTaskReminder(eventCaptor.capture());
             
             TaskReminderEvent event = eventCaptor.getValue();
             assertEquals(NotificationType.SMS, event.getNotificationType());
@@ -288,7 +292,7 @@ class TaskReminderSchedulerTest {
         
         @Test
         @DisplayName("一般優先級逾期任務應該使用Email通知")
-        void shouldUseEmailForNormalPriorityOverdueTasks() {
+        void shouldUseEmailForNormalPriorityOverdueTasks() throws Exception {
             // Given
             Task normalOverdueTask = Task.builder()
                 .id(TaskId.of("normal-overdue"))
@@ -309,7 +313,7 @@ class TaskReminderSchedulerTest {
             
             // Then
             ArgumentCaptor<TaskReminderEvent> eventCaptor = ArgumentCaptor.forClass(TaskReminderEvent.class);
-            verify(mockTaskReminderUseCase).handleTaskReminder(eventCaptor.capture());
+            verify(mockTaskReminderUseCase, timeout(1000)).handleTaskReminder(eventCaptor.capture());
             
             TaskReminderEvent event = eventCaptor.getValue();
             assertEquals(NotificationType.EMAIL, event.getNotificationType());
@@ -322,7 +326,7 @@ class TaskReminderSchedulerTest {
         
         @Test
         @DisplayName("應該發送每日摘要")
-        void shouldSendDailySummary() {
+        void shouldSendDailySummary() throws Exception {
             // Given
             when(mockTaskRepository.findByStatus(TaskStatus.TODO, TaskStatus.IN_PROGRESS))
                 .thenReturn(testTasks);
@@ -337,7 +341,7 @@ class TaskReminderSchedulerTest {
             verify(mockTaskRepository).findByStatus(TaskStatus.TODO, TaskStatus.IN_PROGRESS);
             
             ArgumentCaptor<TaskReminderEvent> eventCaptor = ArgumentCaptor.forClass(TaskReminderEvent.class);
-            verify(mockTaskReminderUseCase).handleTaskReminder(eventCaptor.capture());
+            verify(mockTaskReminderUseCase, timeout(1000)).handleTaskReminder(eventCaptor.capture());
             
             TaskReminderEvent event = eventCaptor.getValue();
             assertEquals(TaskReminderEvent.ReminderReason.DAILY_SUMMARY, event.getReason());
@@ -365,7 +369,7 @@ class TaskReminderSchedulerTest {
         
         @Test
         @DisplayName("應該發送每週摘要")
-        void shouldSendWeeklySummary() {
+        void shouldSendWeeklySummary() throws Exception {
             // Given
             when(mockTaskRepository.findAll()).thenReturn(testTasks);
             when(mockTaskReminderUseCase.handleTaskReminder(any()))
@@ -379,7 +383,7 @@ class TaskReminderSchedulerTest {
             verify(mockTaskRepository).findAll();
             
             ArgumentCaptor<TaskReminderEvent> eventCaptor = ArgumentCaptor.forClass(TaskReminderEvent.class);
-            verify(mockTaskReminderUseCase).handleTaskReminder(eventCaptor.capture());
+            verify(mockTaskReminderUseCase, timeout(1000)).handleTaskReminder(eventCaptor.capture());
             
             TaskReminderEvent event = eventCaptor.getValue();
             assertEquals(TaskReminderEvent.ReminderReason.WEEKLY_SUMMARY, event.getReason());
@@ -442,7 +446,7 @@ class TaskReminderSchedulerTest {
         
         @Test
         @DisplayName("提醒處理應該是異步的")
-        void shouldProcessRemindersAsynchronously() {
+        void shouldProcessRemindersAsynchronously() throws Exception {
             // Given
             when(mockTaskRepository.findTasksWithDueDateBetween(any(), any()))
                 .thenReturn(testTasks);
@@ -458,7 +462,7 @@ class TaskReminderSchedulerTest {
             // Then
             // 由於是異步處理，主執行緒應該很快返回
             assertTrue(endTime - startTime < 1000, "Should return quickly due to async processing");
-            verify(mockTaskReminderUseCase).handleTaskReminder(any());
+            verify(mockTaskReminderUseCase, timeout(1000)).handleTaskReminder(any());
         }
     }
 }

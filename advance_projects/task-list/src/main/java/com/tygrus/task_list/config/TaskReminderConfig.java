@@ -1,6 +1,6 @@
 package com.tygrus.task_list.config;
 
-import com.tygrus.task_list.infrastructure.repository.TaskRepository;
+import com.tygrus.task_list.domain.repository.TaskRepository;
 import com.tygrus.task_list.infrastructure.repository.InMemoryTaskRepository;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
