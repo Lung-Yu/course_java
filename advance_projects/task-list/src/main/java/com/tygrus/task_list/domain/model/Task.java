@@ -1,5 +1,7 @@
 package com.tygrus.task_list.domain.model;
 
+import com.tygrus.task_list.domain.event.TaskDeletedEvent;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,6 +24,9 @@ public class Task {
     private final LocalDateTime createdAt;
     private TaskStatus status;
     private LocalDateTime updatedAt;
+    private boolean deleted;
+    private LocalDateTime deletedAt;
+    private String deletedBy;
     private final List<DomainEvent> domainEvents = new ArrayList<>();
     
     // Builder pattern for complex construction
@@ -84,6 +89,9 @@ public class Task {
         this.createdAt = builder.createdAt != null ? builder.createdAt : LocalDateTime.now();
         this.status = TaskStatus.PENDING; // 預設狀態
         this.updatedAt = this.createdAt;
+        this.deleted = false; // 預設未刪除
+        this.deletedAt = null;
+        this.deletedBy = null;
     }
     
     private void validateRequiredFields(Builder builder) {
@@ -109,6 +117,11 @@ public class Task {
             throw new IllegalArgumentException("TaskStatus cannot be null");
         }
         
+        // 檢查任務是否已被刪除
+        if (this.deleted) {
+            throw new IllegalStateException("Cannot update status of deleted task");
+        }
+        
         if (!this.status.canTransitionTo(newStatus)) {
             throw new IllegalStateException(
                 String.format("Invalid status transition from %s to %s", 
@@ -122,6 +135,34 @@ public class Task {
         
         // 記錄Domain Event
         this.domainEvents.add(new TaskStatusChangedEvent(this.id, previousStatus, newStatus));
+    }
+    
+    /**
+     * 軟刪除任務
+     * 
+     * @param deletedBy 執行刪除的用戶ID
+     * @param reason 刪除原因
+     */
+    public void markAsDeleted(String deletedBy, String reason) {
+        if (deletedBy == null || deletedBy.trim().isEmpty()) {
+            throw new IllegalArgumentException("Deleted by cannot be null or empty");
+        }
+        if (reason == null || reason.trim().isEmpty()) {
+            throw new IllegalArgumentException("Delete reason cannot be null or empty");
+        }
+        
+        // 檢查任務是否已被刪除
+        if (this.deleted) {
+            throw new IllegalStateException("Task is already deleted");
+        }
+        
+        this.deleted = true;
+        this.deletedAt = LocalDateTime.now();
+        this.deletedBy = deletedBy.trim();
+        this.updatedAt = LocalDateTime.now();
+        
+        // 添加刪除事件
+        this.domainEvents.add(new TaskDeletedEvent(this.id, deletedBy, reason));
     }
     
     /**
@@ -178,6 +219,18 @@ public class Task {
     
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
+    }
+    
+    public boolean isDeleted() {
+        return deleted;
+    }
+    
+    public LocalDateTime getDeletedAt() {
+        return deletedAt;
+    }
+    
+    public String getDeletedBy() {
+        return deletedBy;
     }
     
     @Override
