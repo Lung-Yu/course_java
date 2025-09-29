@@ -13,10 +13,18 @@ public final class TaskId {
     private final String value;
     
     private TaskId(String value) {
-        if (value == null || value.trim().isEmpty()) {
-            throw new IllegalArgumentException("TaskId value cannot be null or empty");
-        }
+        validateValue(value);
         this.value = value;
+    }
+    
+    private void validateValue(String value) {
+        if (value == null) {
+            throw new IllegalArgumentException("TaskId value cannot be null");
+        }
+        if (value.trim().isEmpty()) {
+            throw new IllegalArgumentException("TaskId value cannot be empty");
+        }
+        // 可以加入更多格式驗證，例如UUID格式檢查
     }
     
     public static TaskId generate() {

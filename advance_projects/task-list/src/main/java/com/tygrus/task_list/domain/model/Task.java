@@ -1,6 +1,9 @@
 package com.tygrus.task_list.domain.model;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -19,6 +22,7 @@ public class Task {
     private final LocalDateTime createdAt;
     private TaskStatus status;
     private LocalDateTime updatedAt;
+    private final List<DomainEvent> domainEvents = new ArrayList<>();
     
     // Builder pattern for complex construction
     public static class Builder {
@@ -70,21 +74,31 @@ public class Task {
     
     private Task(Builder builder) {
         // 驗證必填欄位
+        validateRequiredFields(builder);
+        
+        this.id = builder.id;
+        this.title = builder.title.trim();
+        this.description = builder.description != null ? builder.description.trim() : null;
+        this.priority = builder.priority != null ? builder.priority : Priority.MEDIUM; // 預設優先級
+        this.dueDate = builder.dueDate;
+        this.createdAt = builder.createdAt != null ? builder.createdAt : LocalDateTime.now();
+        this.status = TaskStatus.PENDING; // 預設狀態
+        this.updatedAt = this.createdAt;
+    }
+    
+    private void validateRequiredFields(Builder builder) {
         if (builder.id == null) {
             throw new IllegalArgumentException("TaskId cannot be null");
         }
         if (builder.title == null || builder.title.trim().isEmpty()) {
             throw new IllegalArgumentException("Task title cannot be null or empty");
         }
-        
-        this.id = builder.id;
-        this.title = builder.title.trim();
-        this.description = builder.description;
-        this.priority = builder.priority;
-        this.dueDate = builder.dueDate;
-        this.createdAt = builder.createdAt != null ? builder.createdAt : LocalDateTime.now();
-        this.status = TaskStatus.PENDING; // 預設狀態
-        this.updatedAt = this.createdAt;
+        if (builder.title.length() > 255) {
+            throw new IllegalArgumentException("Task title cannot exceed 255 characters");
+        }
+        if (builder.description != null && builder.description.length() > 1000) {
+            throw new IllegalArgumentException("Task description cannot exceed 1000 characters");
+        }
     }
     
     /**
@@ -102,8 +116,26 @@ public class Task {
             );
         }
         
+        TaskStatus previousStatus = this.status;
         this.status = newStatus;
         this.updatedAt = LocalDateTime.now();
+        
+        // 記錄Domain Event
+        this.domainEvents.add(new TaskStatusChangedEvent(this.id, previousStatus, newStatus));
+    }
+    
+    /**
+     * 獲取Domain Events (不可變列表)
+     */
+    public List<DomainEvent> getDomainEvents() {
+        return Collections.unmodifiableList(domainEvents);
+    }
+    
+    /**
+     * 清除Domain Events (通常在事件發布後調用)
+     */
+    public void clearDomainEvents() {
+        this.domainEvents.clear();
     }
     
     // Getters
