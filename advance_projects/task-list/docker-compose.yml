@@ -1,0 +1,84 @@
+services:
+  # PostgreSQL 資料庫
+  postgres:
+    image: postgres:15
+    container_name: task-list-postgres
+    environment:
+      POSTGRES_DB: demo_task_db
+      POSTGRES_USER: demo-task
+      POSTGRES_PASSWORD: demo-pwd
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./sample_data:/docker-entrypoint-initdb.d
+    networks:
+      - task-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U demo-task -d demo_task_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Task List 應用程式
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: task-list-app
+    environment:
+      # 資料庫連接配置
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/demo_task_db
+      SPRING_DATASOURCE_USERNAME: demo-task
+      SPRING_DATASOURCE_PASSWORD: demo-pwd
+      
+      # JPA 配置
+      SPRING_JPA_HIBERNATE_DDL_AUTO: create-drop
+      SPRING_JPA_SHOW_SQL: true
+      
+      # 日誌配置
+      LOGGING_LEVEL_COM_TYGRUS_TASK_LIST: DEBUG
+      
+      # 應用程式配置
+      SPRING_PROFILES_ACTIVE: docker
+      
+      # 資料庫等待配置
+      DB_HOST: postgres
+      DB_PORT: 5432
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - task-network
+    volumes:
+      - ./logs:/app/logs
+    restart: unless-stopped
+
+  # pgAdmin (可選的資料庫管理工具)
+  pgadmin:
+    image: dpage/pgadmin4:7
+    container_name: task-list-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@taskapp.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    networks:
+      - task-network
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
+volumes:
+  postgres_data:
+    driver: local
+  pgadmin_data:
+    driver: local
+
+networks:
+  task-network:
+    driver: bridge

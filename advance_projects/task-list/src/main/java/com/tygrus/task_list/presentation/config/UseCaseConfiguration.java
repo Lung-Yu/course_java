@@ -16,6 +16,11 @@ import org.springframework.context.annotation.Configuration;
 public class UseCaseConfiguration {
     
     @Bean
+    public StatisticsCache statisticsCache() {
+        return new StatisticsCache();
+    }
+    
+    @Bean
     public CreateTaskUseCase createTaskUseCase(TaskRepository taskRepository) {
         return new CreateTaskUseCase(taskRepository);
     }

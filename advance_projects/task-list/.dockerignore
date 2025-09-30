@@ -1,0 +1,42 @@
+# 排除不需要的文件和目錄
+.git
+.github
+.vscode
+.idea
+*.md
+*.log
+
+# Terraform 文件
+infra/.terraform/
+infra/*.tfstate*
+infra/.terraform.lock.hcl
+
+# Docker 相關
+docker-compose.yml
+Dockerfile
+
+# 日誌文件
+logs/
+*.log
+
+# 臨時文件
+tmp/
+temp/
+
+# OS 相關
+.DS_Store
+Thumbs.db
+
+# 測試報告
+*.xml
+
+# Maven - 只保留最終 JAR，排除其他建置檔案
+target/classes/
+target/test-classes/
+target/maven-archiver/
+target/maven-status/
+target/generated-sources/
+target/generated-test-sources/
+target/surefire-reports/
+target/jacoco.exec
+target/*.original
