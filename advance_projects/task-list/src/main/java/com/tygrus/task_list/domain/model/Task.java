@@ -77,6 +77,28 @@ public class Task {
         return new Builder();
     }
     
+    /**
+     * 從持久化層恢復 Task 物件的靜態工廠方法
+     * 用於從資料庫讀取時，避免狀態轉換驗證
+     */
+    public static Task restoreFromPersistence(TaskId id, String title, String description, 
+                                             TaskStatus status, LocalDateTime dueDate, 
+                                             LocalDateTime createdAt) {
+        // 使用 builder 建立基本物件
+        Task task = Task.builder()
+            .id(id)
+            .title(title)
+            .description(description)
+            .dueDate(dueDate)
+            .createdAt(createdAt)
+            .build();
+        
+        // 直接設定狀態，跳過狀態轉換驗證
+        task.status = status;
+        
+        return task;
+    }
+    
     private Task(Builder builder) {
         // 驗證必填欄位
         validateRequiredFields(builder);
