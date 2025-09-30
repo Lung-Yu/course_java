@@ -130,19 +130,24 @@ class JpaTaskRepositoryIntegrationTest extends PostgreSQLDataJpaTestBase {
             // Given
             TaskEntity task = repository.findById("task-1").orElseThrow();
             String originalTitle = task.getTitle();
+            Long originalVersion = task.getVersion();
             
             // When
             task.setTitle("更新後的標題");
             task.setStatus(TaskStatus.COMPLETED);
-            TaskEntity updatedTask = repository.save(task);
+            repository.saveAndFlush(task);
+            entityManager.clear(); // 清除持久化上下文，確保重新載入
+            
+            // 重新查詢以確保資料已更新
+            TaskEntity reloadedTask = repository.findById("task-1").orElseThrow();
             
             // Then
-            assertThat(updatedTask.getTitle()).isEqualTo("更新後的標題");
-            assertThat(updatedTask.getStatus()).isEqualTo(TaskStatus.COMPLETED);
-            assertThat(updatedTask.getVersion()).isGreaterThan(0L);
-            assertThat(updatedTask.getUpdatedAt()).isAfter(updatedTask.getCreatedAt());
+            assertThat(reloadedTask.getTitle()).isEqualTo("更新後的標題");
+            assertThat(reloadedTask.getStatus()).isEqualTo(TaskStatus.COMPLETED);
+            assertThat(reloadedTask.getVersion()).isGreaterThan(originalVersion);
+            assertThat(reloadedTask.getUpdatedAt()).isAfter(reloadedTask.getCreatedAt());
             
-            logger.info("成功更新任務: {} -> {}", originalTitle, updatedTask.getTitle());
+            logger.info("成功更新任務: {} -> {}, 版本號: {} -> {}", originalTitle, reloadedTask.getTitle(), originalVersion, reloadedTask.getVersion());
         }
     }
 
@@ -224,6 +229,8 @@ class JpaTaskRepositoryIntegrationTest extends PostgreSQLDataJpaTestBase {
             // When
             LocalDateTime deleteTime = LocalDateTime.now();
             int deleted = repository.softDeleteById("task-1", deleteTime, deleteTime);
+            entityManager.flush();
+            entityManager.clear();
             
             // Then
             assertThat(deleted).isEqualTo(1);
@@ -288,6 +295,8 @@ class JpaTaskRepositoryIntegrationTest extends PostgreSQLDataJpaTestBase {
             LocalDateTime updateTime = LocalDateTime.now();
             List<String> idsToUpdate = Arrays.asList("task-1", "task-2");
             int updated = repository.updateStatusByIds(idsToUpdate, TaskStatus.COMPLETED, updateTime);
+            entityManager.flush();
+            entityManager.clear();
             
             // Then
             assertThat(updated).isEqualTo(2);
@@ -409,12 +418,16 @@ class JpaTaskRepositoryIntegrationTest extends PostgreSQLDataJpaTestBase {
             
             // When
             task.setTitle("更新標題");
-            TaskEntity updatedTask = repository.save(task);
+            repository.saveAndFlush(task);
+            entityManager.clear();
+            
+            // 重新查詢以確保版本號已更新
+            TaskEntity reloadedTask = repository.findById("task-1").orElseThrow();
             
             // Then
-            assertThat(updatedTask.getVersion()).isGreaterThan(originalVersion);
+            assertThat(reloadedTask.getVersion()).isGreaterThan(originalVersion);
             
-            logger.info("樂觀鎖版本號從 {} 更新到 {}", originalVersion, updatedTask.getVersion());
+            logger.info("樂觀鎖版本號從 {} 更新到 {}", originalVersion, reloadedTask.getVersion());
         }
     }
 }

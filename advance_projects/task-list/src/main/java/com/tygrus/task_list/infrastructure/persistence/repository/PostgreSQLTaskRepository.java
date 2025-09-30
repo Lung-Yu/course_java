@@ -14,6 +14,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +35,9 @@ public class PostgreSQLTaskRepository implements TaskRepository {
     private static final Logger logger = LoggerFactory.getLogger(PostgreSQLTaskRepository.class);
 
     private final JpaTaskRepository jpaTaskRepository;
+    
+    @PersistenceContext
+    private EntityManager entityManager;
 
     public PostgreSQLTaskRepository(JpaTaskRepository jpaTaskRepository) {
         this.jpaTaskRepository = jpaTaskRepository;
@@ -347,6 +353,10 @@ public class PostgreSQLTaskRepository implements TaskRepository {
             LocalDateTime now = LocalDateTime.now();
             int deleted = jpaTaskRepository.softDeleteByIds(ids, now, now);
             
+            // 清除實體管理器快取以確保後續查詢能讀取到最新資料
+            entityManager.flush();
+            entityManager.clear();
+            
             logger.debug("Successfully soft deleted {} tasks", deleted);
             return deleted;
         } catch (Exception e) {
@@ -368,6 +378,10 @@ public class PostgreSQLTaskRepository implements TaskRepository {
             
             LocalDateTime now = LocalDateTime.now();
             int updated = jpaTaskRepository.updateStatusByIds(ids, status, now);
+            
+            // 清除實體管理器快取以確保後續查詢能讀取到最新資料
+            entityManager.flush();
+            entityManager.clear();
             
             logger.debug("Successfully updated status of {} tasks", updated);
             return updated;
