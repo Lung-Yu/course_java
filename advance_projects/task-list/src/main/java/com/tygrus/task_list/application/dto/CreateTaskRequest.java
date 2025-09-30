@@ -12,10 +12,14 @@ import java.util.Objects;
  */
 public class CreateTaskRequest {
     
-    private final String title;
-    private final String description;
-    private final Priority priority;
-    private final LocalDateTime dueDate;
+    private String title;
+    private String description;
+    private Priority priority;
+    private LocalDateTime dueDate;
+    
+    // 默認構造函數 (Thymeleaf需要)
+    public CreateTaskRequest() {
+    }
     
     private CreateTaskRequest(Builder builder) {
         this.title = builder.title;
@@ -74,6 +78,23 @@ public class CreateTaskRequest {
     
     public LocalDateTime getDueDate() {
         return dueDate;
+    }
+    
+    // Setters (Thymeleaf需要)
+    public void setTitle(String title) {
+        this.title = title;
+    }
+    
+    public void setDescription(String description) {
+        this.description = description;
+    }
+    
+    public void setPriority(Priority priority) {
+        this.priority = priority;
+    }
+    
+    public void setDueDate(LocalDateTime dueDate) {
+        this.dueDate = dueDate;
     }
     
     @Override

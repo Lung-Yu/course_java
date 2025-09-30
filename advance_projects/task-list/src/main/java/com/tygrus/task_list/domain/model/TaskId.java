@@ -53,6 +53,10 @@ public final class TaskId {
         return new TaskId(value);
     }
     
+    public static TaskId fromString(String value) {
+        return new TaskId(value);
+    }
+    
     /**
      * 從UUID物件創建TaskId
      */

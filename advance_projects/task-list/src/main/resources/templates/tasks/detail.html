@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${task.title + ' - 任務詳情'}">任務詳情 - 任務管理系統</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <style>
+        .task-detail-card {
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        .task-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+        }
+        .priority-badge {
+            font-size: 0.875rem;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+        }
+        .priority-high {
+            background-color: #dc3545;
+            color: white;
+        }
+        .priority-medium {
+            background-color: #ffc107;
+            color: #000;
+        }
+        .priority-low {
+            background-color: #28a745;
+            color: white;
+        }
+        .status-timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+        .status-timeline::before {
+            content: '';
+            position: absolute;
+            left: 0.5rem;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background-color: #dee2e6;
+        }
+        .status-item {
+            position: relative;
+            padding-bottom: 1rem;
+        }
+        .status-item::before {
+            content: '';
+            position: absolute;
+            left: -0.75rem;
+            top: 0.25rem;
+            width: 1rem;
+            height: 1rem;
+            border-radius: 50%;
+            background-color: #6c757d;
+        }
+        .status-item.active::before {
+            background-color: #0d6efd;
+        }
+        .status-item.completed::before {
+            background-color: #198754;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+        .info-card {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 1.5rem;
+            border-left: 4px solid #0d6efd;
+        }
+        .action-buttons {
+            position: sticky;
+            top: 1rem;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+    <!-- 導航欄 -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/tasks">
+                <i class="bi bi-check2-square"></i> 任務管理系統
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/tasks">
+                            <i class="bi bi-list-task"></i> 任務列表
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/tasks/create">
+                            <i class="bi bi-plus-circle"></i> 新增任務
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/tasks/statistics">
+                            <i class="bi bi-graph-up"></i> 統計報表
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- 主要內容 -->
+    <div class="container mt-4">
+        <!-- 成功/錯誤訊息 -->
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show">
+            <i class="bi bi-check-circle"></i>
+            <span th:text="${successMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show">
+            <i class="bi bi-exclamation-triangle"></i>
+            <span th:text="${errorMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        
+        <div class="row">
+            <!-- 主要內容區域 -->
+            <div class="col-lg-8">
+                <div class="task-detail-card">
+                    <!-- 任務標題區域 -->
+                    <div class="task-header">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h1 class="h2 mb-2" th:text="${task.title}">任務標題</h1>
+                                <p class="mb-3 opacity-75">任務 ID: <code th:text="${task.id}"></code></p>
+                            </div>
+                            <span class="priority-badge" 
+                                  th:classappend="'priority-' + ${task.priority.name().toLowerCase()}"
+                                  th:text="${task.priority.name() + ' 優先級'}">
+                            </span>
+                        </div>
+                        
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <span class="badge" 
+                                      th:classappend="${task.status.name() == 'COMPLETED' ? 'bg-success' : 
+                                                      task.status.name() == 'IN_PROGRESS' ? 'bg-warning text-dark' : 
+                                                      task.status.name() == 'CANCELLED' ? 'bg-danger' : 'bg-secondary'}"
+                                      style="font-size: 1rem; padding: 0.5rem 1rem;"
+                                      th:text="${task.status.displayName}">
+                                </span>
+                            </div>
+                            <div class="col-md-6 text-md-end">
+                                <small class="opacity-75">
+                                    創建於 <span th:text="${#temporals.format(task.createdAt, 'yyyy-MM-dd HH:mm')}"></span>
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 任務詳情 -->
+                    <div class="card-body p-4">
+                        <!-- 任務描述 -->
+                        <div class="mb-4">
+                            <h5 class="mb-3">
+                                <i class="bi bi-card-text"></i> 任務描述
+                            </h5>
+                            <div th:if="${task.description}" 
+                                 class="p-3 bg-light rounded"
+                                 style="white-space: pre-wrap;"
+                                 th:text="${task.description}">
+                            </div>
+                            <div th:if="${task.description == null or task.description.isEmpty()}" 
+                                 class="text-muted fst-italic">
+                                此任務暫無詳細描述
+                            </div>
+                        </div>
+                        
+                        <!-- 時間資訊 -->
+                        <div class="info-grid mb-4">
+                            <div class="info-card">
+                                <h6 class="mb-2">
+                                    <i class="bi bi-calendar-plus"></i> 創建時間
+                                </h6>
+                                <p class="mb-0" th:text="${#temporals.format(task.createdAt, 'yyyy年MM月dd日 HH:mm:ss')}"></p>
+                            </div>
+                            
+                            <div class="info-card">
+                                <h6 class="mb-2">
+                                    <i class="bi bi-calendar-check"></i> 最後更新
+                                </h6>
+                                <p class="mb-0" th:text="${#temporals.format(task.updatedAt, 'yyyy年MM月dd日 HH:mm:ss')}"></p>
+                            </div>
+                            
+                            <div th:if="${task.dueDate}" class="info-card" 
+                                 th:classappend="${task.dueDate.isBefore(T(java.time.LocalDateTime).now()) ? 'border-danger' : ''}">
+                                <h6 class="mb-2">
+                                    <i class="bi bi-calendar-event"></i> 到期時間
+                                </h6>
+                                <p class="mb-0" 
+                                   th:text="${#temporals.format(task.dueDate, 'yyyy年MM月dd日 HH:mm:ss')}"
+                                   th:classappend="${task.dueDate.isBefore(T(java.time.LocalDateTime).now()) ? 'text-danger fw-bold' : ''}">
+                                </p>
+                                <small th:if="${task.dueDate.isBefore(T(java.time.LocalDateTime).now())}" 
+                                       class="text-danger">
+                                    <i class="bi bi-exclamation-triangle"></i> 已逾期
+                                </small>
+                            </div>
+                            
+                            <div th:if="${task.dueDate == null}" class="info-card">
+                                <h6 class="mb-2">
+                                    <i class="bi bi-calendar-event"></i> 到期時間
+                                </h6>
+                                <p class="mb-0 text-muted fst-italic">未設定到期時間</p>
+                            </div>
+                        </div>
+                        
+                        <!-- 狀態時間軸 -->
+                        <div class="mb-4">
+                            <h5 class="mb-3">
+                                <i class="bi bi-clock-history"></i> 狀態歷程
+                            </h5>
+                            <div class="status-timeline">
+                                <div class="status-item" 
+                                     th:classappend="${task.status.name() == 'PENDING' or task.status.name() == 'TODO'} ? 'active' : 'completed'">
+                                    <h6>待處理</h6>
+                                    <small class="text-muted">任務已創建，等待開始執行</small>
+                                </div>
+                                <div class="status-item" 
+                                     th:classappend="${task.status.name() == 'IN_PROGRESS'} ? 'active' : 
+                                                    (${task.status.name() == 'COMPLETED' or task.status.name() == 'CANCELLED'} ? 'completed' : '')">
+                                    <h6>進行中</h6>
+                                    <small class="text-muted">任務正在執行中</small>
+                                </div>
+                                <div class="status-item" 
+                                     th:classappend="${task.status.name() == 'COMPLETED'} ? 'completed' : ''">
+                                    <h6>已完成</h6>
+                                    <small class="text-muted">任務已成功完成</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 操作區域 -->
+            <div class="col-lg-4">
+                <div class="action-buttons">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="bi bi-gear"></i> 任務操作
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <!-- 狀態變更 -->
+                            <div class="mb-3">
+                                <label class="form-label">變更狀態</label>
+                                <form th:action="@{/tasks/{id}/status(id=${task.id})}" method="post">
+                                    <div class="input-group">
+                                        <select name="status" class="form-select">
+                                            <option th:each="status : ${statusOptions}" 
+                                                    th:value="${status}" 
+                                                    th:text="${status.displayName}"
+                                                    th:selected="${status == task.status}">
+                                            </option>
+                                        </select>
+                                        <button type="submit" class="btn btn-outline-primary">
+                                            <i class="bi bi-arrow-right"></i>
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                            
+                            <!-- 快速操作按鈕 -->
+                            <div class="d-grid gap-2">
+                                <form th:if="${task.status.name() == 'PENDING' or task.status.name() == 'TODO'}"
+                                      th:action="@{/tasks/{id}/status(id=${task.id})}" method="post" style="display: inline;">
+                                    <input type="hidden" name="status" value="IN_PROGRESS">
+                                    <button type="submit" class="btn btn-warning w-100">
+                                        <i class="bi bi-play-fill"></i> 開始執行
+                                    </button>
+                                </form>
+                                
+                                <form th:if="${task.status.name() == 'IN_PROGRESS'}"
+                                      th:action="@{/tasks/{id}/status(id=${task.id})}" method="post" style="display: inline;">
+                                    <input type="hidden" name="status" value="COMPLETED">
+                                    <button type="submit" class="btn btn-success w-100">
+                                        <i class="bi bi-check-circle"></i> 標記完成
+                                    </button>
+                                </form>
+                                
+                                <a href="/tasks" class="btn btn-outline-secondary">
+                                    <i class="bi bi-arrow-left"></i> 返回列表
+                                </a>
+                            </div>
+                            
+                            <hr>
+                            
+                            <!-- 危險操作 -->
+                            <div class="text-center">
+                                <h6 class="text-danger mb-3">危險操作</h6>
+                                <form th:action="@{/tasks/{id}/delete(id=${task.id})}" method="post" 
+                                      onsubmit="return confirmDelete(this)">
+                                    <input type="hidden" name="reason" value="用戶主動刪除">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm">
+                                        <i class="bi bi-trash"></i> 刪除任務
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 任務統計 -->
+                    <div class="card mt-3">
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <i class="bi bi-info-circle"></i> 任務資訊
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-2 text-center">
+                                <div class="col-6">
+                                    <div class="bg-light p-2 rounded">
+                                        <small class="text-muted">優先級</small><br>
+                                        <strong th:text="${task.priority.name()}" 
+                                                th:classappend="${task.priority.name() == 'HIGH' ? 'text-danger' : 
+                                                                task.priority.name() == 'MEDIUM' ? 'text-warning' : 'text-success'}">
+                                        </strong>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="bg-light p-2 rounded">
+                                        <small class="text-muted">當前狀態</small><br>
+                                        <strong th:text="${task.status.displayName}"></strong>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div th:if="${task.dueDate}" class="mt-3 text-center">
+                                <div class="bg-light p-2 rounded">
+                                    <small class="text-muted">剩餘時間</small><br>
+                                    <span th:if="${task.dueDate.isAfter(T(java.time.LocalDateTime).now())}"
+                                          class="text-success">
+                                        <i class="bi bi-clock"></i>
+                                        <span th:text="${T(java.time.Duration).between(T(java.time.LocalDateTime).now(), task.dueDate).toDays()}"></span> 天
+                                    </span>
+                                    <span th:if="${task.dueDate.isBefore(T(java.time.LocalDateTime).now())}"
+                                          class="text-danger">
+                                        <i class="bi bi-exclamation-triangle"></i> 已逾期
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // 確認刪除
+        function confirmDelete(form) {
+            const taskTitle = document.querySelector('h1').textContent;
+            return confirm('確定要刪除任務 "' + taskTitle + '" 嗎？\n\n此操作無法復原，請謹慎考慮。');
+        }
+        
+        // 狀態變更確認
+        document.querySelector('select[name="status"]').addEventListener('change', function() {
+            const currentStatus = this.dataset.current || this.querySelector('option[selected]').textContent;
+            const newStatus = this.options[this.selectedIndex].textContent;
+            
+            if (currentStatus !== newStatus) {
+                if (!confirm('確定要將任務狀態從 "' + currentStatus + '" 更改為 "' + newStatus + '" 嗎？')) {
+                    this.value = this.dataset.current || '';
+                }
+            }
+        });
+        
+        // 自動隱藏警告訊息
+        setTimeout(function() {
+            document.querySelectorAll('.alert').forEach(function(alert) {
+                var bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
+        
+        // 自動刷新剩餘時間
+        setInterval(function() {
+            // 可以在這裡添加自動刷新剩餘時間的邏輯
+        }, 60000); // 每分鐘刷新一次
+    </script>
+</body>
+</html>

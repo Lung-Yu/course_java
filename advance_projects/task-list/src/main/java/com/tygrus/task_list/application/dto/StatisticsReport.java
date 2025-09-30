@@ -195,6 +195,27 @@ public class StatisticsReport {
     public long getProcessingTimeMs() { return processingTimeMs; }
     public boolean isFromCache() { return fromCache; }
     
+    // 便捷方法用於前端統計展示
+    public double getInProgressRate() {
+        return totalTasks > 0 ? (double) inProgressTasks / totalTasks * 100 : 0;
+    }
+    
+    public double getPendingRate() {
+        return totalTasks > 0 ? (double) pendingTasks / totalTasks * 100 : 0;
+    }
+    
+    public long getHighPriorityTasks() {
+        return tasksByPriority.getOrDefault("HIGH", 0L);
+    }
+    
+    public long getMediumPriorityTasks() {
+        return tasksByPriority.getOrDefault("MEDIUM", 0L);
+    }
+    
+    public long getLowPriorityTasks() {
+        return tasksByPriority.getOrDefault("LOW", 0L);
+    }
+    
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;

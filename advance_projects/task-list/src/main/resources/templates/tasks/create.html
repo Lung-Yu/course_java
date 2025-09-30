@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新增任務 - 任務管理系統</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <style>
+        .form-container {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .form-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 10px 10px 0 0;
+            margin: -2rem -2rem 2rem -2rem;
+        }
+        .required {
+            color: #dc3545;
+        }
+        .char-counter {
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+        .char-counter.warning {
+            color: #fd7e14;
+        }
+        .char-counter.danger {
+            color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <!-- 導航欄 -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/tasks">
+                <i class="bi bi-check2-square"></i> 任務管理系統
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/tasks">
+                            <i class="bi bi-list-task"></i> 任務列表
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/tasks/create">
+                            <i class="bi bi-plus-circle"></i> 新增任務
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/tasks/statistics">
+                            <i class="bi bi-graph-up"></i> 統計報表
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- 主要內容 -->
+    <div class="container mt-4">
+        <!-- 錯誤訊息 -->
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show">
+            <i class="bi bi-exclamation-triangle"></i>
+            <span th:text="${errorMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="form-container">
+                    <div class="form-header">
+                        <h1 class="h3 mb-0">
+                            <i class="bi bi-plus-circle"></i> 新增任務
+                        </h1>
+                        <p class="mb-0 mt-2 opacity-75">填寫以下資訊來創建新任務</p>
+                    </div>
+                    
+                    <form th:action="@{/tasks/create}" method="post" th:object="${createTaskRequest}">
+                        <!-- 任務標題 -->
+                        <div class="mb-3">
+                            <label for="title" class="form-label">
+                                任務標題 <span class="required">*</span>
+                            </label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="title" 
+                                   th:field="*{title}"
+                                   th:classappend="${#fields.hasErrors('title')} ? 'is-invalid'"
+                                   maxlength="255"
+                                   required
+                                   placeholder="請輸入簡潔明確的任務標題">
+                            <div class="d-flex justify-content-between">
+                                <div th:if="${#fields.hasErrors('title')}" class="invalid-feedback">
+                                    <span th:errors="*{title}"></span>
+                                </div>
+                                <small class="char-counter" id="titleCounter">0/255</small>
+                            </div>
+                        </div>
+                        
+                        <!-- 任務描述 -->
+                        <div class="mb-3">
+                            <label for="description" class="form-label">任務描述</label>
+                            <textarea class="form-control" 
+                                      id="description" 
+                                      th:field="*{description}"
+                                      th:classappend="${#fields.hasErrors('description')} ? 'is-invalid'"
+                                      rows="4"
+                                      maxlength="1000"
+                                      placeholder="詳細描述任務內容、要求或注意事項"></textarea>
+                            <div class="d-flex justify-content-between">
+                                <div th:if="${#fields.hasErrors('description')}" class="invalid-feedback">
+                                    <span th:errors="*{description}"></span>
+                                </div>
+                                <small class="char-counter" id="descriptionCounter">0/1000</small>
+                            </div>
+                        </div>
+                        
+                        <!-- 優先級 -->
+                        <div class="mb-3">
+                            <label for="priority" class="form-label">優先級</label>
+                            <select class="form-select" 
+                                    id="priority" 
+                                    th:field="*{priority}"
+                                    th:classappend="${#fields.hasErrors('priority')} ? 'is-invalid'">
+                                <option value="">請選擇優先級</option>
+                                <option th:each="priority : ${priorityOptions}" 
+                                        th:value="${priority}" 
+                                        th:text="${priority.name()}"
+                                        th:classappend="${priority.name() == 'HIGH' ? 'text-danger' : 
+                                                        priority.name() == 'MEDIUM' ? 'text-warning' : 'text-success'}">
+                                </option>
+                            </select>
+                            <div th:if="${#fields.hasErrors('priority')}" class="invalid-feedback">
+                                <span th:errors="*{priority}"></span>
+                            </div>
+                            <div class="form-text">
+                                <i class="bi bi-info-circle"></i> 
+                                優先級將影響任務在列表中的顯示順序
+                            </div>
+                        </div>
+                        
+                        <!-- 到期時間 -->
+                        <div class="mb-4">
+                            <label for="dueDate" class="form-label">到期時間</label>
+                            <input type="datetime-local" 
+                                   class="form-control" 
+                                   id="dueDate" 
+                                   th:field="*{dueDate}"
+                                   th:classappend="${#fields.hasErrors('dueDate')} ? 'is-invalid'"
+                                   th:min="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd\'T\'HH:mm')}">
+                            <div th:if="${#fields.hasErrors('dueDate')}" class="invalid-feedback">
+                                <span th:errors="*{dueDate}"></span>
+                            </div>
+                            <div class="form-text">
+                                <i class="bi bi-calendar-event"></i> 
+                                設定任務的預期完成時間（可選）
+                            </div>
+                        </div>
+                        
+                        <!-- 操作按鈕 -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="/tasks" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left"></i> 取消
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle"></i> 創建任務
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 說明卡片 -->
+        <div class="row mt-4 justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="card border-info">
+                    <div class="card-header bg-info text-white">
+                        <i class="bi bi-lightbulb"></i> 小提示
+                    </div>
+                    <div class="card-body">
+                        <ul class="mb-0">
+                            <li>任務標題應該簡潔明確，讓人一眼就能理解任務內容</li>
+                            <li>描述可以包含詳細的要求、步驟或注意事項</li>
+                            <li>高優先級任務會在列表中優先顯示</li>
+                            <li>設定到期時間有助於時間管理和提醒</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // 字數統計功能
+        function setupCharCounter(inputId, counterId, maxLength) {
+            const input = document.getElementById(inputId);
+            const counter = document.getElementById(counterId);
+            
+            function updateCounter() {
+                const currentLength = input.value.length;
+                counter.textContent = currentLength + '/' + maxLength;
+                
+                // 根據字數變更顏色
+                counter.classList.remove('warning', 'danger');
+                if (currentLength > maxLength * 0.8) {
+                    counter.classList.add('warning');
+                }
+                if (currentLength > maxLength * 0.95) {
+                    counter.classList.add('danger');
+                }
+            }
+            
+            input.addEventListener('input', updateCounter);
+            updateCounter(); // 初始化
+        }
+        
+        // 初始化字數統計
+        setupCharCounter('title', 'titleCounter', 255);
+        setupCharCounter('description', 'descriptionCounter', 1000);
+        
+        // 表單驗證
+        (function() {
+            'use strict';
+            
+            const form = document.querySelector('form');
+            form.addEventListener('submit', function(event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                
+                form.classList.add('was-validated');
+            }, false);
+        })();
+        
+        // 設定預設到期時間為明天
+        document.addEventListener('DOMContentLoaded', function() {
+            const dueDateInput = document.getElementById('dueDate');
+            if (!dueDateInput.value) {
+                const tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                tomorrow.setHours(18, 0, 0, 0); // 設定為明天下午6點
+                
+                const year = tomorrow.getFullYear();
+                const month = String(tomorrow.getMonth() + 1).padStart(2, '0');
+                const day = String(tomorrow.getDate()).padStart(2, '0');
+                const hours = String(tomorrow.getHours()).padStart(2, '0');
+                const minutes = String(tomorrow.getMinutes()).padStart(2, '0');
+                
+                dueDateInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
+            }
+        });
+        
+        // 自動隱藏警告訊息
+        setTimeout(function() {
+            document.querySelectorAll('.alert').forEach(function(alert) {
+                var bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
+    </script>
+</body>
+</html>

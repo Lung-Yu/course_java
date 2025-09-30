@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title != null ? title + ' - 任務管理系統' : '任務管理系統'}">任務管理系統</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <style>
+        .navbar-brand {
+            font-weight: bold;
+        }
+        .task-card {
+            transition: all 0.2s ease-in-out;
+        }
+        .task-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .priority-badge {
+            font-size: 0.75rem;
+        }
+        .status-badge {
+            font-size: 0.75rem;
+        }
+        .footer {
+            margin-top: auto;
+            padding: 1rem 0;
+            background-color: #f8f9fa;
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        main {
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+    <!-- 導航欄 -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/tasks">
+                <i class="bi bi-check2-square"></i> 任務管理系統
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/tasks">
+                            <i class="bi bi-list-task"></i> 任務列表
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/tasks/create">
+                            <i class="bi bi-plus-circle"></i> 新增任務
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/tasks/statistics">
+                            <i class="bi bi-graph-up"></i> 統計報表
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- 主要內容區域 -->
+    <main class="container mt-4">
+        <!-- 成功訊息 -->
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle"></i>
+            <span th:text="${successMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        
+        <!-- 錯誤訊息 -->
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle"></i>
+            <span th:text="${errorMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        
+        <!-- 頁面標題 -->
+        <div th:if="${pageTitle}" class="row mb-4">
+            <div class="col">
+                <h1 th:text="${pageTitle}" class="h2">頁面標題</h1>
+            </div>
+        </div>
+        
+        <!-- 頁面內容 -->
+        <div th:replace="${content}">
+            <!-- 這裡會被各個頁面的內容替換 -->
+        </div>
+    </main>
+    
+    <!-- 頁腳 -->
+    <footer class="footer mt-auto py-3 bg-light">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <span class="text-muted">© 2024 任務管理系統 - Java Course Project</span>
+                </div>
+                <div class="col-md-6 text-end">
+                    <span class="text-muted">基於 Spring Boot MVC 架構</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- 自定義腳本 -->
+    <script th:inline="javascript">
+        // 自動隱藏警告訊息
+        setTimeout(function() {
+            document.querySelectorAll('.alert').forEach(function(alert) {
+                var bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
+        
+        // 確認刪除對話框
+        function confirmDelete(taskTitle) {
+            return confirm('確定要刪除任務 "' + taskTitle + '" 嗎？\n此操作無法復原。');
+        }
+        
+        // 狀態更新確認
+        function confirmStatusUpdate(currentStatus, newStatus) {
+            return confirm('確定要將任務狀態從 "' + currentStatus + '" 更改為 "' + newStatus + '" 嗎？');
+        }
+    </script>
+</body>
+</html>

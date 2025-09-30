@@ -171,6 +171,16 @@ public class TaskQueryRequest {
             this.pageSize = pageSize;
             return this;
         }
+        
+        public Builder sortField(TaskSortField sortField) {
+            this.sortField = sortField;
+            return this;
+        }
+        
+        public Builder sortDirection(SortDirection sortDirection) {
+            this.sortDirection = sortDirection;
+            return this;
+        }
 
         public TaskQueryRequest build() {
             return new TaskQueryRequest(this);

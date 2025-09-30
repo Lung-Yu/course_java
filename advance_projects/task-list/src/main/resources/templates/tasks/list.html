@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>任務列表 - 任務管理系統</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <style>
+        .task-card {
+            transition: all 0.2s ease-in-out;
+            border-left: 4px solid #dee2e6;
+        }
+        .task-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .task-card.priority-high {
+            border-left-color: #dc3545;
+        }
+        .task-card.priority-medium {
+            border-left-color: #ffc107;
+        }
+        .task-card.priority-low {
+            border-left-color: #28a745;
+        }
+        .priority-badge.priority-high {
+            background-color: #dc3545;
+        }
+        .priority-badge.priority-medium {
+            background-color: #ffc107;
+            color: #000;
+        }
+        .priority-badge.priority-low {
+            background-color: #28a745;
+        }
+        .filter-section {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .stats-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 導航欄 -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/tasks">
+                <i class="bi bi-check2-square"></i> 任務管理系統
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/tasks">
+                            <i class="bi bi-list-task"></i> 任務列表
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/tasks/create">
+                            <i class="bi bi-plus-circle"></i> 新增任務
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/tasks/statistics">
+                            <i class="bi bi-graph-up"></i> 統計報表
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- 主要內容 -->
+    <div class="container mt-4">
+        <!-- 成功/錯誤訊息 -->
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show">
+            <i class="bi bi-check-circle"></i>
+            <span th:text="${successMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        
+        <div th:if="${param.error}" class="alert alert-danger alert-dismissible fade show">
+            <i class="bi bi-exclamation-triangle"></i>
+            <span th:text="${param.error[0]}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        
+        <!-- 頁面標題和操作按鈕 -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <h1 class="h2">
+                    <i class="bi bi-list-task"></i> 任務列表
+                </h1>
+                <p class="text-muted">管理您的待辦事項</p>
+            </div>
+            <div class="col-md-6 text-end">
+                <a href="/tasks/create" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> 新增任務
+                </a>
+            </div>
+        </div>
+        
+        <!-- 統計卡片 -->
+        <div th:if="${statistics}" class="row mb-4">
+            <div class="col-md-3 mb-3">
+                <div class="card stats-card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">總任務數</h5>
+                        <h2 th:text="${statistics.totalTasks}">0</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card bg-success text-white text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">已完成</h5>
+                        <h2 th:text="${statistics.completedTasks}">0</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card bg-warning text-dark text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">進行中</h5>
+                        <h2 th:text="${statistics.inProgressTasks}">0</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card bg-info text-white text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">待處理</h5>
+                        <h2 th:text="${statistics.pendingTasks}">0</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 篩選區域 -->
+        <div class="filter-section">
+            <form method="get" action="/tasks">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label">搜尋標題</label>
+                        <input type="text" name="title" class="form-control" 
+                               th:value="${param.title}" placeholder="輸入關鍵字">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">狀態</label>
+                        <select name="status" class="form-select">
+                            <option value="">全部狀態</option>
+                            <option th:each="status : ${statusOptions}" 
+                                    th:value="${status}" 
+                                    th:text="${status.displayName}"
+                                    th:selected="${param.status != null and param.status[0] == status.name()}">
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">優先級</label>
+                        <select name="priority" class="form-select">
+                            <option value="">全部優先級</option>
+                            <option th:each="priority : ${priorityOptions}" 
+                                    th:value="${priority}" 
+                                    th:text="${priority.name()}"
+                                    th:selected="${param.priority != null and param.priority[0] == priority.name()}">
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">排序方式</label>
+                        <select name="sortField" class="form-select">
+                            <option th:each="field : ${sortFieldOptions}"
+                                    th:value="${field}"
+                                    th:text="${field.name()}"
+                                    th:selected="${param.sortField != null and param.sortField[0] == field.name()}">
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">排序方向</label>
+                        <select name="sortDirection" class="form-select">
+                            <option value="ASC" th:selected="${param.sortDirection != null and param.sortDirection[0] == 'ASC'}">升序</option>
+                            <option value="DESC" th:selected="${param.sortDirection == null or param.sortDirection[0] == 'DESC'}">降序</option>
+                        </select>
+                    </div>
+                    <div class="col-md-1">
+                        <label class="form-label">&nbsp;</label>
+                        <button type="submit" class="btn btn-outline-primary w-100">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        
+        <!-- 任務列表 -->
+        <div class="row">
+            <div th:if="${tasks.content.empty}" class="col-12">
+                <div class="text-center py-5">
+                    <i class="bi bi-inbox" style="font-size: 4rem; color: #6c757d;"></i>
+                    <h3 class="mt-3 text-muted">暫無任務</h3>
+                    <p class="text-muted">開始創建您的第一個任務吧！</p>
+                    <a href="/tasks/create" class="btn btn-primary">
+                        <i class="bi bi-plus-circle"></i> 新增任務
+                    </a>
+                </div>
+            </div>
+            
+            <div th:each="task : ${tasks.content}" class="col-md-6 col-lg-4 mb-3">
+                <div class="card task-card h-100" 
+                     th:classappend="'priority-' + ${task.priority.name().toLowerCase()}">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="card-title" th:text="${task.title}">任務標題</h5>
+                            <span class="badge priority-badge" 
+                                  th:classappend="'priority-' + ${task.priority.name().toLowerCase()}"
+                                  th:text="${task.priority.name()}">
+                            </span>
+                        </div>
+                        
+                        <p class="card-text text-muted" th:text="${task.description}">任務描述</p>
+                        
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <small class="text-muted">狀態：</small>
+                                <span class="badge" 
+                                      th:classappend="${task.status.name() == 'COMPLETED' ? 'bg-success' : 
+                                                      task.status.name() == 'IN_PROGRESS' ? 'bg-warning text-dark' : 
+                                                      task.status.name() == 'CANCELLED' ? 'bg-danger' : 'bg-secondary'}"
+                                      th:text="${task.status.displayName}">
+                                </span>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted">創建時間：</small><br>
+                                <small th:text="${#temporals.format(task.createdAt, 'MM/dd HH:mm')}"></small>
+                            </div>
+                        </div>
+                        
+                        <div th:if="${task.dueDate}" class="mb-2">
+                            <small class="text-muted">到期時間：</small>
+                            <small th:text="${#temporals.format(task.dueDate, 'yyyy-MM-dd HH:mm')}"
+                                   th:classappend="${task.dueDate.isBefore(T(java.time.LocalDateTime).now()) ? 'text-danger fw-bold' : ''}">
+                            </small>
+                        </div>
+                    </div>
+                    
+                    <div class="card-footer bg-transparent">
+                        <div class="d-flex justify-content-between">
+                            <a th:href="@{/tasks/{id}(id=${task.id})}" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-eye"></i> 詳情
+                            </a>
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-outline-secondary btn-sm dropdown-toggle" 
+                                        data-bs-toggle="dropdown">
+                                    <i class="bi bi-gear"></i>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <form th:action="@{/tasks/{id}/status(id=${task.id})}" method="post" style="display: inline;">
+                                            <input type="hidden" name="status" value="IN_PROGRESS">
+                                            <button type="submit" class="dropdown-item"
+                                                    th:if="${task.status.name() == 'PENDING' or task.status.name() == 'TODO'}">
+                                                <i class="bi bi-play"></i> 開始執行
+                                            </button>
+                                        </form>
+                                    </li>
+                                    <li>
+                                        <form th:action="@{/tasks/{id}/status(id=${task.id})}" method="post" style="display: inline;">
+                                            <input type="hidden" name="status" value="COMPLETED">
+                                            <button type="submit" class="dropdown-item"
+                                                    th:if="${task.status.name() == 'IN_PROGRESS'}">
+                                                <i class="bi bi-check"></i> 標記完成
+                                            </button>
+                                        </form>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <form th:action="@{/tasks/{id}/delete(id=${task.id})}" method="post" 
+                                              style="display: inline;"
+                                              onsubmit="return confirmDelete(this.closest('.task-card').querySelector('.card-title').textContent)">
+                                            <button type="submit" class="dropdown-item text-danger">
+                                                <i class="bi bi-trash"></i> 刪除
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 分頁 -->
+        <nav th:if="${tasks.totalPages > 1}" aria-label="任務列表分頁">
+            <ul class="pagination justify-content-center">
+                <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                    <a class="page-link" th:href="@{/tasks(page=${currentPage - 1}, size=${param.size}, status=${param.status}, priority=${param.priority}, title=${param.title})}">
+                        <i class="bi bi-chevron-left"></i>
+                    </a>
+                </li>
+                
+                <li th:each="i : ${#numbers.sequence(0, tasks.totalPages - 1)}" 
+                    class="page-item" 
+                    th:classappend="${i == currentPage} ? 'active'">
+                    <a class="page-link" 
+                       th:href="@{/tasks(page=${i}, size=${param.size}, status=${param.status}, priority=${param.priority}, title=${param.title})}"
+                       th:text="${i + 1}">1</a>
+                </li>
+                
+                <li class="page-item" th:classappend="${currentPage == tasks.totalPages - 1} ? 'disabled'">
+                    <a class="page-link" th:href="@{/tasks(page=${currentPage + 1}, size=${param.size}, status=${param.status}, priority=${param.priority}, title=${param.title})}">
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // 確認刪除
+        function confirmDelete(taskTitle) {
+            return confirm('確定要刪除任務 "' + taskTitle + '" 嗎？\n此操作無法復原。');
+        }
+        
+        // 自動隱藏警告訊息
+        setTimeout(function() {
+            document.querySelectorAll('.alert').forEach(function(alert) {
+                var bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
+    </script>
+</body>
+</html>
