@@ -6,6 +6,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.tygrus.task_list.application.dto.CreateTaskRequest;
 import com.tygrus.task_list.application.exception.InvalidFileFormatException;
 import com.tygrus.task_list.domain.model.Priority;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,6 +26,7 @@ import java.util.stream.Stream;
  */
 public class JsonFileParser implements FileParser {
     
+    private static final Logger logger = LogManager.getLogger(JsonFileParser.class);
     private static final String[] SUPPORTED_EXTENSIONS = {"json"};
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     
@@ -110,7 +113,7 @@ public class JsonFileParser implements FileParser {
                 
         } catch (Exception e) {
             // 記錄解析錯誤但不中斷整個處理流程
-            System.err.println("Failed to parse JSON node: " + taskNode + ", Error: " + e.getMessage());
+            logger.error("Failed to parse JSON node: {}, Error: {}", taskNode, e.getMessage());
             return null;
         }
     }

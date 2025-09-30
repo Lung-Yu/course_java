@@ -2,6 +2,8 @@ package com.tygrus.task_list.application.usecase;
 
 import com.tygrus.task_list.application.dto.*;
 import com.tygrus.task_list.domain.model.TaskStatus;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Arrays;
 import java.util.List;
@@ -18,6 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class BatchUpdateTasksUseCaseDemo {
 
+    private static final Logger logger = LogManager.getLogger(BatchUpdateTasksUseCaseDemo.class);
     private final BatchUpdateTasksUseCase batchUpdateUseCase;
 
     public BatchUpdateTasksUseCaseDemo(BatchUpdateTasksUseCase batchUpdateUseCase) {
@@ -53,7 +56,7 @@ public class BatchUpdateTasksUseCaseDemo {
             printBasicResults(result);
             
         } catch (Exception e) {
-            System.err.println("批次更新失敗: " + e.getMessage());
+            logger.error("批次更新失敗: {}", e.getMessage());
         }
     }
 
@@ -89,7 +92,7 @@ public class BatchUpdateTasksUseCaseDemo {
             printDetailedResults(result);
             
         } catch (Exception e) {
-            System.err.println("批次更新失敗: " + e.getMessage());
+            logger.error("批次更新失敗: {}", e.getMessage());
         }
     }
 
@@ -133,7 +136,7 @@ public class BatchUpdateTasksUseCaseDemo {
             printPerformanceResults(result, endTime - startTime);
             
         } catch (Exception e) {
-            System.err.println("大批量處理失敗: " + e.getMessage());
+            logger.error("大批量處理失敗: {}", e.getMessage());
         }
     }
 
@@ -169,7 +172,7 @@ public class BatchUpdateTasksUseCaseDemo {
             }
             
         } catch (Exception e) {
-            System.err.println("批次操作完全失敗: " + e.getMessage());
+            logger.error("批次操作完全失敗: {}", e.getMessage());
         }
     }
 

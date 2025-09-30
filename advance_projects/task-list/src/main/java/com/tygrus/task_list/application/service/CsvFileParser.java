@@ -3,6 +3,8 @@ package com.tygrus.task_list.application.service;
 import com.tygrus.task_list.application.dto.CreateTaskRequest;
 import com.tygrus.task_list.application.exception.InvalidFileFormatException;
 import com.tygrus.task_list.domain.model.Priority;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -24,6 +26,7 @@ import java.util.stream.Stream;
  */
 public class CsvFileParser implements FileParser {
     
+    private static final Logger logger = LogManager.getLogger(CsvFileParser.class);
     private static final String[] SUPPORTED_EXTENSIONS = {"csv"};
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private static final String CSV_DELIMITER = ",";
@@ -100,7 +103,7 @@ public class CsvFileParser implements FileParser {
                 
         } catch (Exception e) {
             // 記錄解析錯誤但不中斷整個處理流程
-            System.err.println("Failed to parse CSV line: " + line + ", Error: " + e.getMessage());
+            logger.error("Failed to parse CSV line: {}, Error: {}", line, e.getMessage());
             return null;
         }
     }

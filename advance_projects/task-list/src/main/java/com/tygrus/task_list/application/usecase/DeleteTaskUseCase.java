@@ -7,6 +7,8 @@ import com.tygrus.task_list.application.exception.TaskNotFoundException;
 import com.tygrus.task_list.domain.model.Task;
 import com.tygrus.task_list.domain.model.TaskId;
 import com.tygrus.task_list.domain.repository.TaskRepository;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import org.springframework.stereotype.Service;
 
@@ -28,6 +30,7 @@ import java.util.Optional;
 @Service
 public class DeleteTaskUseCase {
 
+    private static final Logger logger = LogManager.getLogger(DeleteTaskUseCase.class);
     private final TaskRepository taskRepository;
 
     public DeleteTaskUseCase(TaskRepository taskRepository) {
@@ -144,7 +147,7 @@ public class DeleteTaskUseCase {
         // 2. 發送通知給相關人員
         // 3. 更新統計指標
         
-        System.out.printf("Task deleted - ID: %s, DeletedBy: %s, Reason: %s, Timestamp: %s%n",
+        logger.info("Task deleted - ID: {}, DeletedBy: {}, Reason: {}, Timestamp: {}",
             task.getId().getValue(),
             request.getDeletedBy(),
             request.getReason(),

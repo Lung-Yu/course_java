@@ -10,6 +10,8 @@ import com.tygrus.task_list.domain.model.Task;
 import com.tygrus.task_list.domain.model.TaskId;
 import com.tygrus.task_list.domain.model.TaskStatus;
 import com.tygrus.task_list.domain.repository.TaskRepository;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 // 移除 Spring 依賴，使用純 Java 實現
 
@@ -36,6 +38,7 @@ import java.util.stream.Collectors;
  */
 public class BatchUpdateTasksUseCase {
 
+    private static final Logger logger = LogManager.getLogger(BatchUpdateTasksUseCase.class);
     private final TaskRepository taskRepository;
     private final ExecutorService executorService;
     private final ReentrantReadWriteLock progressLock = new ReentrantReadWriteLock();
@@ -247,7 +250,7 @@ public class BatchUpdateTasksUseCase {
                 callback.accept(progress);
             } catch (Exception e) {
                 // 進度回報失敗不應該影響主要處理流程
-                System.err.println("Progress callback failed: " + e.getMessage());
+                logger.error("Progress callback failed: {}", e.getMessage());
             } finally {
                 progressLock.readLock().unlock();
             }
@@ -274,7 +277,7 @@ public class BatchUpdateTasksUseCase {
             return future.get();
         } catch (Exception e) {
             // 記錄錯誤但不拋出異常，讓其他批次繼續處理
-            System.err.println("Failed to get batch result: " + e.getMessage());
+            logger.error("Failed to get batch result: {}", e.getMessage());
             return new BatchResult(Collections.emptyList(), 
                 Collections.singletonList(new BatchOperationError("BATCH_ERROR", e.getMessage(), e)));
         }
