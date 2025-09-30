@@ -134,7 +134,9 @@ public interface JpaTaskRepository extends JpaRepository<TaskEntity, String> {
     /**
      * 查找指定狀態的任務統計資料
      */
-    @Query("SELECT t.status, COUNT(t), AVG(CASE WHEN t.dueDate IS NOT NULL THEN EXTRACT(EPOCH FROM (t.dueDate - t.createdAt))/86400 ELSE NULL END) " +
+    @Query("SELECT t.status, COUNT(t), AVG(CASE WHEN t.dueDate IS NOT NULL THEN " +
+           "CAST((EXTRACT(EPOCH FROM t.dueDate) - EXTRACT(EPOCH FROM t.createdAt))/86400 AS double) " +
+           "ELSE NULL END) " +
            "FROM TaskEntity t WHERE t.deleted = false GROUP BY t.status")
     List<Object[]> getTaskStatistics();
 

@@ -7,6 +7,7 @@ import com.tygrus.task_list.domain.repository.TaskRepository;
 import com.tygrus.task_list.infrastructure.persistence.entity.TaskEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
  * 將 JPA Repository 適配為 Domain Repository
  */
 @Repository("postgresqlTaskRepository")
+@Primary
 @Transactional
 public class PostgreSQLTaskRepository implements TaskRepository {
 

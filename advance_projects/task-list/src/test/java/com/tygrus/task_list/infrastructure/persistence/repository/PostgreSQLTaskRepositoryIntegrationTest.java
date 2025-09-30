@@ -3,7 +3,6 @@ package com.tygrus.task_list.infrastructure.persistence.repository;
 import com.tygrus.task_list.domain.model.Task;
 import com.tygrus.task_list.domain.model.TaskId;
 import com.tygrus.task_list.domain.model.TaskStatus;
-import com.tygrus.task_list.infrastructure.testcontainers.PostgreSQLTestBase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -12,8 +11,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -29,10 +32,18 @@ import static org.assertj.core.api.Assertions.*;
 @SpringBootTest
 @ActiveProfiles("test")
 @Transactional
+@Testcontainers
 @DisplayName("PostgreSQL TaskRepository 整合測試")
-class PostgreSQLTaskRepositoryIntegrationTest extends PostgreSQLTestBase {
+class PostgreSQLTaskRepositoryIntegrationTest {
 
     private static final Logger logger = LoggerFactory.getLogger(PostgreSQLTaskRepositoryIntegrationTest.class);
+
+    @Container
+    @ServiceConnection
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine")
+            .withDatabaseName("taskdb")
+            .withUsername("testuser")
+            .withPassword("testpass");
 
     @Autowired
     private PostgreSQLTaskRepository repository;
@@ -476,14 +487,14 @@ class PostgreSQLTaskRepositoryIntegrationTest extends PostgreSQLTestBase {
         @DisplayName("應該確認 PostgreSQL 容器正常運行")
         void shouldVerifyPostgreSQLContainerIsRunning() {
             // Then
-            assertThat(isContainerRunning()).isTrue();
-            assertThat(getJdbcUrl()).contains("postgresql");
-            assertThat(getUsername()).isEqualTo("testuser");
-            assertThat(getPassword()).isEqualTo("testpass");
+            assertThat(postgres.isRunning()).isTrue();
+            assertThat(postgres.getJdbcUrl()).contains("postgresql");
+            assertThat(postgres.getUsername()).isEqualTo("testuser");
+            assertThat(postgres.getPassword()).isEqualTo("testpass");
             
-            logger.info("PostgreSQL Testcontainer 運行狀態: {}", isContainerRunning());
-            logger.info("容器 JDBC URL: {}", getJdbcUrl());
-            logger.info("容器用戶名: {}", getUsername());
+            logger.info("PostgreSQL Testcontainer 運行狀態: {}", postgres.isRunning());
+            logger.info("容器 JDBC URL: {}", postgres.getJdbcUrl());
+            logger.info("容器用戶名: {}", postgres.getUsername());
         }
 
         @Test
