@@ -15,7 +15,9 @@ import jakarta.validation.Valid;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 任務管理MVC控制器
@@ -97,6 +99,15 @@ public class TaskViewController {
         model.addAttribute("createTaskRequest", new CreateTaskRequest());
         model.addAttribute("priorityOptions", Arrays.asList(Priority.values()));
         return "tasks/create";
+    }
+    
+    /**
+     * 測試端點
+     */
+    @GetMapping("/test")
+    @ResponseBody
+    public String test() {
+        return "Test endpoint working";
     }
     
     /**
@@ -229,6 +240,7 @@ public class TaskViewController {
             StatisticsRequest statisticsRequest = StatisticsRequest.builder()
                 .lastDays(30)
                 .reportTitle("系統統計")
+                .useCache(false)  // 暫時禁用緩存進行調試
                 .build();
             
             StatisticsReport report = taskStatisticsUseCase.generateReport(statisticsRequest);

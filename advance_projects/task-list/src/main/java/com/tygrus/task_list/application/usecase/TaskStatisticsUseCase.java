@@ -5,6 +5,7 @@ import com.tygrus.task_list.application.dto.StatisticsReport;
 import com.tygrus.task_list.application.dto.StatisticsRequest;
 import com.tygrus.task_list.application.dto.TaskDTO;
 import com.tygrus.task_list.domain.model.Priority;
+import com.tygrus.task_list.domain.model.Task;
 import com.tygrus.task_list.domain.model.TaskStatus;
 import com.tygrus.task_list.domain.repository.TaskRepository;
 import com.tygrus.task_list.infrastructure.cache.StatisticsCache;
@@ -90,14 +91,41 @@ public class TaskStatisticsUseCase {
      * 獲取時間範圍內的任務
      */
     private List<TaskDTO> fetchTasksInDateRange(StatisticsRequest request) {
-        return taskRepository.findAll().stream()
-            .filter(task -> !task.isDeleted() || request.isIncludeDeleted())
-            .map(task -> TaskDTO.fromTask(task))
-            .filter(task -> isTaskInDateRange(task, request))
-            .filter(task -> matchesStatusFilter(task, request))
-            .filter(task -> matchesPriorityFilter(task, request))
+        List<Task> allTasks = taskRepository.findAll();
+        System.out.println("DEBUG: Found " + allTasks.size() + " tasks from repository");
+        
+        List<TaskDTO> result = allTasks.stream()
+            .filter(task -> {
+                boolean notDeleted = !task.isDeleted() || request.isIncludeDeleted();
+                System.out.println("DEBUG: Task " + task.getId() + " - deleted filter: " + notDeleted);
+                return notDeleted;
+            })
+            .map(task -> {
+                TaskDTO dto = TaskDTO.fromTask(task);
+                System.out.println("DEBUG: Mapped task " + task.getId() + " to DTO, createdAt: " + dto.getCreatedAt());
+                return dto;
+            })
+            .filter(task -> {
+                boolean inRange = isTaskInDateRange(task, request);
+                System.out.println("DEBUG: Task " + task.getId() + " - date range filter: " + inRange + 
+                    " (created: " + task.getCreatedAt() + ", range: " + request.getStartDate() + " to " + request.getEndDate() + ")");
+                return inRange;
+            })
+            .filter(task -> {
+                boolean statusMatch = matchesStatusFilter(task, request);
+                System.out.println("DEBUG: Task " + task.getId() + " - status filter: " + statusMatch);
+                return statusMatch;
+            })
+            .filter(task -> {
+                boolean priorityMatch = matchesPriorityFilter(task, request);
+                System.out.println("DEBUG: Task " + task.getId() + " - priority filter: " + priorityMatch);
+                return priorityMatch;
+            })
             .limit(request.getMaxResults())
             .collect(Collectors.toList());
+        
+        System.out.println("DEBUG: Final filtered result: " + result.size() + " tasks");
+        return result;
     }
     
     /**

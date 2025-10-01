@@ -1,6 +1,7 @@
 package com.tygrus.task_list.infrastructure.cache;
 
 import com.tygrus.task_list.application.dto.StatisticsReport;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -14,6 +15,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * 提供記憶體內快取機制，用於提升統計查詢效能
  * 支援 TTL (Time To Live) 和記憶體管理
  */
+@Component
 public class StatisticsCache {
     
     /**

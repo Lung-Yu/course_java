@@ -141,10 +141,8 @@
                                     th:classappend="${#fields.hasErrors('priority')} ? 'is-invalid'">
                                 <option value="">請選擇優先級</option>
                                 <option th:each="priority : ${priorityOptions}" 
-                                        th:value="${priority}" 
-                                        th:text="${priority.name()}"
-                                        th:classappend="${priority.name() == 'HIGH' ? 'text-danger' : 
-                                                        priority.name() == 'MEDIUM' ? 'text-warning' : 'text-success'}">
+                                        th:value="${priority.name()}" 
+                                        th:text="${priority.description}">
                                 </option>
                             </select>
                             <div th:if="${#fields.hasErrors('priority')}" class="invalid-feedback">
@@ -163,8 +161,7 @@
                                    class="form-control" 
                                    id="dueDate" 
                                    th:field="*{dueDate}"
-                                   th:classappend="${#fields.hasErrors('dueDate')} ? 'is-invalid'"
-                                   th:min="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd\'T\'HH:mm')}">
+                                   th:classappend="${#fields.hasErrors('dueDate')} ? 'is-invalid'">
                             <div th:if="${#fields.hasErrors('dueDate')}" class="invalid-feedback">
                                 <span th:errors="*{dueDate}"></span>
                             </div>

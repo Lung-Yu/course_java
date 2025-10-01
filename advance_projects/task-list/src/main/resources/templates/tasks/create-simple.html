@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新增任務 - 任務管理系統</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+<body>
+    <!-- 導航欄 -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/tasks">
+                <i class="bi bi-check2-square"></i> 任務管理系統
+            </a>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/tasks">
+                            <i class="bi bi-list-task"></i> 任務列表
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/tasks/create">
+                            <i class="bi bi-plus-circle"></i> 新增任務
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- 主要內容 -->
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h1 class="h3 mb-0">
+                            <i class="bi bi-plus-circle"></i> 新增任務
+                        </h1>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/tasks/create}" method="post" th:object="${createTaskRequest}">
+                            <!-- 任務標題 -->
+                            <div class="mb-3">
+                                <label for="title" class="form-label">任務標題 <span class="text-danger">*</span></label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="title" 
+                                       th:field="*{title}"
+                                       required
+                                       placeholder="請輸入任務標題">
+                            </div>
+                            
+                            <!-- 任務描述 -->
+                            <div class="mb-3">
+                                <label for="description" class="form-label">任務描述</label>
+                                <textarea class="form-control" 
+                                          id="description" 
+                                          th:field="*{description}"
+                                          rows="3"
+                                          placeholder="請輸入任務描述"></textarea>
+                            </div>
+                            
+                            <!-- 優先級 -->
+                            <div class="mb-3">
+                                <label for="priority" class="form-label">優先級</label>
+                                <select class="form-select" id="priority" th:field="*{priority}">
+                                    <option value="">請選擇優先級</option>
+                                    <option value="LOW">低</option>
+                                    <option value="MEDIUM">中</option>
+                                    <option value="HIGH">高</option>
+                                    <option value="URGENT">緊急</option>
+                                </select>
+                            </div>
+                            
+                            <!-- 到期時間 -->
+                            <div class="mb-4">
+                                <label for="dueDate" class="form-label">到期時間</label>
+                                <input type="datetime-local" 
+                                       class="form-control" 
+                                       id="dueDate" 
+                                       th:field="*{dueDate}">
+                            </div>
+                            
+                            <!-- 操作按鈕 -->
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <a href="/tasks" class="btn btn-outline-secondary">
+                                    <i class="bi bi-arrow-left"></i> 取消
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-check-circle"></i> 創建任務
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
