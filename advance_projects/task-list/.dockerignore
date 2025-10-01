@@ -1,42 +1,58 @@
-# 排除不需要的文件和目錄
+# ==========================================
+# Docker 建置優化 - 排除不需要的文件
+# ==========================================
+
+# Git 相關
 .git
+.gitignore
+.gitattributes
 .github
+
+# IDE 設置
 .vscode
 .idea
+*.iml
+.project
+.classpath
+.settings
+
+# 文檔（不需要在映像中）
 *.md
-*.log
+docs/
+DEPLOYMENT*.md
+README*.md
+UC-*.md
+*_SUMMARY.md
 
-# Terraform 文件
-infra/.terraform/
-infra/*.tfstate*
-infra/.terraform.lock.hcl
-
-# Docker 相關
+# Terraform 和部署配置
+infra/
 docker-compose.yml
-Dockerfile
+Makefile
+*.sh
+!mvnw
+!scripts/wait-for-db.sh
 
-# 日誌文件
+# 日誌和臨時文件
 logs/
 *.log
-
-# 臨時文件
 tmp/
 temp/
 
 # OS 相關
 .DS_Store
 Thumbs.db
+desktop.ini
 
-# 測試報告
-*.xml
+# 測試和報告文件
+**/test-classes/
+TEST*.md
+test-*.sh
+sample_data/
 
-# Maven - 只保留最終 JAR，排除其他建置檔案
-target/classes/
-target/test-classes/
-target/maven-archiver/
-target/maven-status/
-target/generated-sources/
-target/generated-test-sources/
-target/surefire-reports/
-target/jacoco.exec
-target/*.original
+# Maven 建置產物（多階段建置會重新建置）
+target/
+!target/*.jar
+
+# 應用程式數據（運行時產生）
+uploads/
+data/

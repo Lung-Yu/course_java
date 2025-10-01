@@ -1,112 +1,141 @@
+# ==========================================
 # Task List 應用程式 Makefile
+# ==========================================
+# 支援兩種部署方式:
+#   1. 開發測試: docker-compose (make dev-*)
+#   2. 生產部署: terraform (make prod-*)
+# ==========================================
 
-.PHONY: help build start stop clean status logs test terraform-init terraform-apply terraform-destroy quick-start
+.PHONY: help dev-start dev-stop dev-restart dev-status dev-logs dev-clean \
+        prod-init prod-plan prod-apply prod-destroy prod-status prod-output \
+        build test maven-build maven-test maven-run setup
 
 # 預設目標
 help: ## 顯示說明
-	@echo "Task List 應用程式管理命令:"
+	@echo "╔════════════════════════════════════════════════════════════╗"
+	@echo "║        Task List 應用程式部署管理工具                      ║"
+	@echo "╚════════════════════════════════════════════════════════════╝"
 	@echo ""
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
-
-quick-start: ## 快速啟動應用程式 (推薦)
-	@chmod +x quick-start.sh
-	@./quick-start.sh
-
-build: ## 建置 Docker 映像檔
-	@echo "🔨 建置 Docker 映像檔..."
-	@docker-compose build
-
-start: ## 啟動所有服務
-	@echo "🚀 啟動所有服務..."
-	@docker-compose up -d
-
-stop: ## 停止所有服務
-	@echo "🛑 停止所有服務..."
-	@docker-compose down
-
-restart: ## 重啟所有服務
-	@echo "🔄 重啟所有服務..."
-	@docker-compose restart
-
-status: ## 檢查服務狀態
-	@echo "📊 檢查服務狀態..."
-	@docker-compose ps
+	@echo "📋 部署方式："
+	@echo "  1️⃣  開發測試環境: docker-compose (make dev-*)"
+	@echo "  2️⃣  生產部署環境: terraform apply (make prod-*)"
 	@echo ""
-	@echo "🔍 健康檢查:"
-	@curl -s http://localhost:8080/actuator/health || echo "❌ 應用程式無法連接"
-	@docker exec -it task-list-postgres pg_isready -U demo-task -d demo_task_db || echo "❌ 資料庫無法連接"
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
+		awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2}'
+	@echo ""
 
-logs: ## 查看服務日誌
-	@echo "📋 查看服務日誌..."
-	@docker-compose logs -f
+# ==========================================
+# 🏗️ 開發測試環境 (Docker Compose)
+# ==========================================
 
-logs-app: ## 查看應用程式日誌
-	@echo "📋 查看應用程式日誌..."
-	@docker-compose logs -f app
+dev-start: ## 啟動開發測試環境
+	@echo "🚀 啟動開發測試環境..."
+	@chmod +x scripts/deploy-dev.sh
+	@./scripts/deploy-dev.sh start
 
-logs-db: ## 查看資料庫日誌
-	@echo "📋 查看資料庫日誌..."
-	@docker-compose logs -f postgres
+dev-stop: ## 停止開發測試環境
+	@echo "🛑 停止開發測試環境..."
+	@chmod +x scripts/deploy-dev.sh
+	@./scripts/deploy-dev.sh stop
 
-clean: ## 清理所有資源 (包含 volumes)
-	@echo "🧹 清理所有資源..."
-	@docker-compose down -v
-	@docker system prune -f
-	@docker volume prune -f
+dev-restart: ## 重啟開發測試環境
+	@echo "🔄 重啟開發測試環境..."
+	@chmod +x scripts/deploy-dev.sh
+	@./scripts/deploy-dev.sh restart
 
-# Maven 相關命令
-maven-build: ## 使用 Maven 建置應用程式
-	@echo "🔨 使用 Maven 建置..."
+dev-status: ## 查看開發環境狀態
+	@chmod +x scripts/deploy-dev.sh
+	@./scripts/deploy-dev.sh status
+
+dev-logs: ## 查看開發環境日誌
+	@chmod +x scripts/deploy-dev.sh
+	@./scripts/deploy-dev.sh logs
+
+dev-logs-app: ## 查看應用程式日誌
+	@chmod +x scripts/deploy-dev.sh
+	@./scripts/deploy-dev.sh logs app
+
+dev-logs-db: ## 查看資料庫日誌
+	@chmod +x scripts/deploy-dev.sh
+	@./scripts/deploy-dev.sh logs postgres
+
+dev-clean: ## 清理開發環境和資料
+	@chmod +x scripts/deploy-dev.sh
+	@./scripts/deploy-dev.sh clean
+
+# ==========================================
+# 🚀 生產部署環境 (Terraform)
+# ==========================================
+
+prod-init: ## 初始化 Terraform
+	@echo "🔧 初始化 Terraform..."
+	@chmod +x scripts/deploy-prod.sh
+	@./scripts/deploy-prod.sh init
+
+prod-plan: ## 規劃 Terraform 部署
+	@echo "📋 規劃 Terraform 部署..."
+	@chmod +x scripts/deploy-prod.sh
+	@./scripts/deploy-prod.sh plan
+
+prod-apply: ## 應用 Terraform 部署
+	@echo "� 應用 Terraform 部署..."
+	@chmod +x scripts/deploy-prod.sh
+	@./scripts/deploy-prod.sh apply
+
+prod-destroy: ## 銷毀生產環境
+	@echo "� 銷毀生產環境..."
+	@chmod +x scripts/deploy-prod.sh
+	@./scripts/deploy-prod.sh destroy
+
+prod-status: ## 查看生產環境狀態
+	@chmod +x scripts/deploy-prod.sh
+	@./scripts/deploy-prod.sh status
+
+prod-output: ## 查看 Terraform 輸出
+	@chmod +x scripts/deploy-prod.sh
+	@./scripts/deploy-prod.sh output
+
+# ==========================================
+# 🔧 Maven 建置命令
+# ==========================================
+
+maven-build: ## Maven 建置應用程式
+	@echo "🔨 Maven 建置..."
 	@./mvnw clean package -DskipTests
 
 maven-test: ## 執行 Maven 測試
 	@echo "🧪 執行測試..."
 	@./mvnw test
 
-maven-run: ## 本地運行應用程式 (需要先啟動資料庫)
-	@echo "🏃 本地運行應用程式..."
+maven-run: ## 本地運行 (需資料庫)
+	@echo "🏃 本地運行..."
 	@./mvnw spring-boot:run
 
-# Terraform 相關命令
-terraform-init: ## 初始化 Terraform
-	@echo "🔧 初始化 Terraform..."
-	@cd infra && terraform init
+# ==========================================
+# 🛠️ 開發工具命令
+# ==========================================
 
-terraform-plan: ## Terraform 規劃
-	@echo "📋 Terraform 規劃..."
-	@cd infra && terraform plan
-
-terraform-apply: ## 應用 Terraform 配置
-	@echo "🚀 應用 Terraform 配置..."
-	@cd infra && terraform apply -auto-approve
-
-terraform-destroy: ## 銷毀 Terraform 資源
-	@echo "💥 銷毀 Terraform 資源..."
-	@cd infra && terraform destroy -auto-approve
-
-# 開發相關命令
-dev-setup: ## 開發環境設置
-	@echo "🛠️  設置開發環境..."
+setup: ## 初始化開發環境
+	@echo "�️  初始化開發環境..."
 	@chmod +x mvnw
 	@chmod +x scripts/*.sh
-	@chmod +x quick-start.sh
+	@echo "✅ 開發環境已準備就緒"
 
-db-only: ## 僅啟動資料庫
-	@echo "🗄️  啟動資料庫..."
-	@docker-compose up -d postgres
+build: ## 建置 Docker 映像
+	@echo "� 建置 Docker 映像..."
+	@docker build -t task-list-app:latest .
 
-open-app: ## 在瀏覽器中打開應用程式
-	@echo "🌐 在瀏覽器中打開應用程式..."
-	@open http://localhost:8080 || xdg-open http://localhost:8080 || echo "請手動開啟 http://localhost:8080"
+test: ## 執行完整測試
+	@echo "🧪 執行測試..."
+	@./mvnw test
 
-open-pgadmin: ## 在瀏覽器中打開 pgAdmin
-	@echo "🔧 在瀏覽器中打開 pgAdmin..."
-	@open http://localhost:5050 || xdg-open http://localhost:5050 || echo "請手動開啟 http://localhost:5050"
+open-app: ## 開啟應用程式
+	@echo "🌐 開啟應用程式..."
+	@open http://localhost:8080 || xdg-open http://localhost:8080 || echo "http://localhost:8080"
 
-test: ## 執行系統功能測試
-	@echo "🧪 執行系統測試..."
-	@chmod +x test-system.sh
-	@./test-system.sh
+open-pgadmin: ## 開啟 pgAdmin
+	@echo "🔧 開啟 pgAdmin..."
+	@open http://localhost:5050 || xdg-open http://localhost:5050 || echo "http://localhost:5050"
 
 # 預設目標
 .DEFAULT_GOAL := help

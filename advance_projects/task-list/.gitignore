@@ -33,10 +33,12 @@ build/
 .vscode/
 
 
-### terraform ###
+### Terraform ###
 *.tfstate
 *.tfstate.*
+*.tfstate.backup
 .terraform/
+.terraform.lock.hcl
 crash.log
 override.tf
 override.tf.json
@@ -44,3 +46,12 @@ override.tf.json
 *_override.tf.json
 .terraformrc
 terraform.rc
+terraform.tfvars
+*.tfplan
+
+### Docker ###
+*.log
+logs/
+
+### Deployment ###
+uploads/
