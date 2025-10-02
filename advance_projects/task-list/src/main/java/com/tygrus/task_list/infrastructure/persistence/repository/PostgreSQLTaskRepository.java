@@ -48,7 +48,19 @@ public class PostgreSQLTaskRepository implements TaskRepository {
         logger.debug("Saving task with ID: {}", task.getId().getValue());
         
         try {
-            TaskEntity entity = TaskEntity.fromDomain(task);
+            // 檢查是否為已存在的實體
+            Optional<TaskEntity> existingEntity = jpaTaskRepository.findById(task.getId().getValue());
+            
+            TaskEntity entity;
+            if (existingEntity.isPresent()) {
+                // 更新現有實體，保留 version 等 JPA 管理的字段
+                entity = existingEntity.get();
+                entity.updateFromDomain(task);
+            } else {
+                // 新建實體
+                entity = TaskEntity.fromDomain(task);
+            }
+            
             TaskEntity savedEntity = jpaTaskRepository.save(entity);
             
             logger.debug("Successfully saved task with ID: {}", savedEntity.getId());

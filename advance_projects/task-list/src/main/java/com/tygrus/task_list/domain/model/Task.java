@@ -84,17 +84,34 @@ public class Task {
     public static Task restoreFromPersistence(TaskId id, String title, String description, 
                                              TaskStatus status, LocalDateTime dueDate, 
                                              LocalDateTime createdAt) {
+        return restoreFromPersistence(id, title, description, status, Priority.MEDIUM, 
+                                     dueDate, createdAt, createdAt, false, null, null);
+    }
+    
+    /**
+     * 完整恢復方法 - 包含所有字段
+     */
+    public static Task restoreFromPersistence(TaskId id, String title, String description, 
+                                             TaskStatus status, Priority priority,
+                                             LocalDateTime dueDate, LocalDateTime createdAt,
+                                             LocalDateTime updatedAt, boolean deleted,
+                                             LocalDateTime deletedAt, String deletedBy) {
         // 使用 builder 建立基本物件
         Task task = Task.builder()
             .id(id)
             .title(title)
             .description(description)
+            .priority(priority)
             .dueDate(dueDate)
             .createdAt(createdAt)
             .build();
         
-        // 直接設定狀態，跳過狀態轉換驗證
+        // 直接設定狀態和其他字段，跳過驗證
         task.status = status;
+        task.updatedAt = updatedAt != null ? updatedAt : createdAt;
+        task.deleted = deleted;
+        task.deletedAt = deletedAt;
+        task.deletedBy = deletedBy;
         
         return task;
     }

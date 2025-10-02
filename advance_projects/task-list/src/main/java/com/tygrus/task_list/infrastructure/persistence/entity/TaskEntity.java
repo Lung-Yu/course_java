@@ -43,6 +43,11 @@ public class TaskEntity {
     @Column(name = "status", nullable = false, length = 20)
     private TaskStatus status;
 
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    @Column(name = "priority", nullable = false, length = 20)
+    private com.tygrus.task_list.domain.model.Priority priority;
+
     @Column(name = "due_date")
     private LocalDateTime dueDate;
 
@@ -72,11 +77,13 @@ public class TaskEntity {
     }
 
     public TaskEntity(String id, String title, String description, TaskStatus status, 
+                     com.tygrus.task_list.domain.model.Priority priority,
                      LocalDateTime dueDate, LocalDateTime createdAt) {
         this.id = id;
         this.title = title;
         this.description = description;
         this.status = status;
+        this.priority = priority != null ? priority : com.tygrus.task_list.domain.model.Priority.MEDIUM;
         this.dueDate = dueDate;
         this.createdAt = createdAt;
         this.updatedAt = createdAt;
@@ -92,10 +99,13 @@ public class TaskEntity {
         entity.title = task.getTitle();
         entity.description = task.getDescription();
         entity.status = task.getStatus();
+        entity.priority = task.getPriority();
         entity.dueDate = task.getDueDate();
         entity.createdAt = task.getCreatedAt();
-        entity.updatedAt = LocalDateTime.now();
-        entity.deleted = false;
+        entity.updatedAt = task.getUpdatedAt();
+        entity.deleted = task.isDeleted();
+        entity.deletedAt = task.getDeletedAt();
+        // 不設置 version，讓 JPA 自動管理
         return entity;
     }
 
@@ -109,8 +119,13 @@ public class TaskEntity {
             this.title,
             this.description,
             this.status,
+            this.priority != null ? this.priority : com.tygrus.task_list.domain.model.Priority.MEDIUM,
             this.dueDate,
-            this.createdAt
+            this.createdAt,
+            this.updatedAt,
+            this.deleted != null ? this.deleted : false,
+            this.deletedAt,
+            null  // deletedBy 字段在 TaskEntity 中沒有存儲
         );
     }
 
@@ -139,6 +154,7 @@ public class TaskEntity {
         this.title = task.getTitle();
         this.description = task.getDescription();
         this.status = task.getStatus();
+        this.priority = task.getPriority();
         this.dueDate = task.getDueDate();
         this.updatedAt = LocalDateTime.now();
     }
@@ -153,6 +169,7 @@ public class TaskEntity {
     public String getTitle() { return title; }
     public String getDescription() { return description; }
     public TaskStatus getStatus() { return status; }
+    public com.tygrus.task_list.domain.model.Priority getPriority() { return priority; }
     public LocalDateTime getDueDate() { return dueDate; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }
@@ -166,6 +183,7 @@ public class TaskEntity {
     public void setTitle(String title) { this.title = title; }
     public void setDescription(String description) { this.description = description; }
     public void setStatus(TaskStatus status) { this.status = status; }
+    public void setPriority(com.tygrus.task_list.domain.model.Priority priority) { this.priority = priority; }
     public void setDueDate(LocalDateTime dueDate) { this.dueDate = dueDate; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }

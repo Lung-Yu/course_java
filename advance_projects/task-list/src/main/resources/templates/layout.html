@@ -14,6 +14,11 @@
         .navbar-brand {
             font-weight: bold;
         }
+        .navbar-nav .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            font-weight: 500;
+        }
         .task-card {
             transition: all 0.2s ease-in-out;
         }
@@ -57,17 +62,22 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="/tasks">
+                        <a class="nav-link" th:classappend="${#httpServletRequest.requestURI == '/tasks' or #httpServletRequest.requestURI.startsWith('/tasks?')} ? 'active' : ''" href="/tasks">
                             <i class="bi bi-list-task"></i> 任務列表
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/tasks/create">
+                        <a class="nav-link" th:classappend="${#httpServletRequest.requestURI == '/tasks/board'} ? 'active' : ''" href="/tasks/board">
+                            <i class="bi bi-kanban"></i> 看板視圖
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:classappend="${#httpServletRequest.requestURI.startsWith('/tasks/create')} ? 'active' : ''" href="/tasks/create">
                             <i class="bi bi-plus-circle"></i> 新增任務
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/tasks/statistics">
+                        <a class="nav-link" th:classappend="${#httpServletRequest.requestURI == '/tasks/statistics'} ? 'active' : ''" href="/tasks/statistics">
                             <i class="bi bi-graph-up"></i> 統計報表
                         </a>
                     </li>

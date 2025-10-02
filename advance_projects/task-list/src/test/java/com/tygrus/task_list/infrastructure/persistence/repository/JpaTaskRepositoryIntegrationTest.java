@@ -57,13 +57,13 @@ class JpaTaskRepositoryIntegrationTest extends PostgreSQLDataJpaTestBase {
         LocalDateTime now = LocalDateTime.now();
         
         sampleTask1 = new TaskEntity("task-1", "完成專案文件", "撰寫技術文件和使用者手冊", 
-                                   TaskStatus.IN_PROGRESS, now.plusDays(3), now);
+                                   TaskStatus.IN_PROGRESS, com.tygrus.task_list.domain.model.Priority.MEDIUM, now.plusDays(3), now);
         
         sampleTask2 = new TaskEntity("task-2", "程式碼重構", "重構舊有程式碼以提升效能", 
-                                   TaskStatus.PENDING, now.plusDays(7), now);
+                                   TaskStatus.PENDING, com.tygrus.task_list.domain.model.Priority.HIGH, now.plusDays(7), now);
         
         sampleTask3 = new TaskEntity("task-3", "測試案例撰寫", "為新功能撰寫單元測試", 
-                                   TaskStatus.COMPLETED, now.minusDays(1), now.minusDays(5));
+                                   TaskStatus.COMPLETED, com.tygrus.task_list.domain.model.Priority.LOW, now.minusDays(1), now.minusDays(5));
         
         // 儲存測試資料
         repository.saveAll(Arrays.asList(sampleTask1, sampleTask2, sampleTask3));
@@ -82,7 +82,8 @@ class JpaTaskRepositoryIntegrationTest extends PostgreSQLDataJpaTestBase {
             // Given
             LocalDateTime now = LocalDateTime.now();
             TaskEntity newTask = new TaskEntity("task-4", "新增功能", "開發新的使用者功能", 
-                                               TaskStatus.PENDING, now.plusDays(5), now);
+                                               TaskStatus.PENDING, com.tygrus.task_list.domain.model.Priority.MEDIUM,
+                                               now.plusDays(5), now);
             
             // When
             TaskEntity savedTask = repository.save(newTask);
@@ -205,7 +206,8 @@ class JpaTaskRepositoryIntegrationTest extends PostgreSQLDataJpaTestBase {
             // Given - 建立一個已過期的任務
             LocalDateTime pastDate = LocalDateTime.now().minusDays(1);
             TaskEntity overdueTask = new TaskEntity("overdue-task", "過期任務", "這是一個過期的任務", 
-                                                   TaskStatus.PENDING, pastDate, pastDate.minusDays(5));
+                                                   TaskStatus.PENDING, com.tygrus.task_list.domain.model.Priority.URGENT,
+                                                   pastDate, pastDate.minusDays(5));
             repository.save(overdueTask);
             
             // When
@@ -325,7 +327,8 @@ class JpaTaskRepositoryIntegrationTest extends PostgreSQLDataJpaTestBase {
             // Given - 新增更多測試資料
             for (int i = 4; i <= 10; i++) {
                 TaskEntity task = new TaskEntity("task-" + i, "任務 " + i, "描述 " + i, 
-                                                TaskStatus.PENDING, LocalDateTime.now().plusDays(i), 
+                                                TaskStatus.PENDING, com.tygrus.task_list.domain.model.Priority.MEDIUM,
+                                                LocalDateTime.now().plusDays(i), 
                                                 LocalDateTime.now());
                 repository.save(task);
             }
